@@ -2,6 +2,8 @@ Database g_dDatabase = null;
 
 ConVar g_cDebug = null;
 ConVar g_cEntry = null;
+ConVar g_cMinOptions = null;
+ConVar g_cMinLength = null;
 
 int g_iCreateTables = -1;
 

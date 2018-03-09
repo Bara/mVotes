@@ -27,6 +27,8 @@ public void OnPluginStart()
 {
     g_cDebug = CreateConVar("mvotes_debug_mode", "1", "Enable or disable debug debug mode", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cEntry = CreateConVar("mvotes_database_entry", "mvotes", "Name for the database entry in your databases.cfg");
+    g_cMinOptions = CreateConVar("mvotes_min_options", "2", "Required options for a vote", FCVAR_NOTIFY, true, 2.0);
+    g_cMinLength = CreateConVar("mvotes_min_length", "1", "(Time in minutes) Is a length less than this value -> Vote start failed", FCVAR_NOTIFY, true, 1.0);
 }
 
 public void OnConfigsExecuted()

@@ -67,6 +67,26 @@ stock void CreatePoll(int client = -1, const char[] title, int length, ArrayList
         LogMessage("[MVotes.CreatePoll] Poll \"%s\" (Length: %d) will be created...", title, length);
     }
 
+    if (options.Length < g_cMinOptions.IntValue)
+    {
+        if (g_cDebug.BoolValue)
+        {
+            LogMessage("[MVotes.CreatePoll] Poll \"%s\" can't created (We need %d or more options for a vote)...", title, g_cMinOptions.IntValue);
+        }
+
+        return;
+    }
+
+    if (length < g_cMinLength.IntValue)
+    {
+        if (g_cDebug.BoolValue)
+        {
+            LogMessage("[MVotes.CreatePoll] Poll \"%s\" can't created (Length must at least %d minutes)...", title, g_cMinLength.IntValue);
+        }
+
+        return;
+    }
+
     g_iTime = GetTime();
     g_iExpire = g_iTime + (length * 60); // length are in minutes, so we'll convert it into seconds
 
@@ -74,7 +94,7 @@ stock void CreatePoll(int client = -1, const char[] title, int length, ArrayList
     {
         if (g_cDebug.BoolValue)
         {
-            LogMessage("[MVotes.CreatePoll] Poll \"%s\" can't created (Time: %d - Expire: %d)...", title, g_iTime, g_iExpire);
+            LogMessage("[MVotes.CreatePoll] Poll \"%s\" can't created (current time it higher as expire time)...", title, g_iTime, g_iExpire);
         }
 
         return;
