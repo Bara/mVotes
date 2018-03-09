@@ -74,7 +74,7 @@ stock void CreatePoll(int client = -1, const char[] title, int length, ArrayList
             LogMessage("[MVotes.CreatePoll] Poll \"%s\" can't created (We need %d or more options for a vote)...", title, g_cMinOptions.IntValue);
         }
 
-        return;
+        return 2;
     }
 
     if (length < g_cMinLength.IntValue)
@@ -84,7 +84,7 @@ stock void CreatePoll(int client = -1, const char[] title, int length, ArrayList
             LogMessage("[MVotes.CreatePoll] Poll \"%s\" can't created (Length must at least %d minutes)...", title, g_cMinLength.IntValue);
         }
 
-        return;
+        return 1;
     }
 
     g_iTime = GetTime();
@@ -97,7 +97,7 @@ stock void CreatePoll(int client = -1, const char[] title, int length, ArrayList
             LogMessage("[MVotes.CreatePoll] Poll \"%s\" can't created (current time it higher as expire time)...", title, g_iTime, g_iExpire);
         }
 
-        return;
+        return 0;
     }
 
     char sAdmin[24];
@@ -137,4 +137,6 @@ stock void CreatePoll(int client = -1, const char[] title, int length, ArrayList
     dp.WriteCell(g_iTime);
     dp.WriteCell(g_iExpire);
     dp.WriteCell(options);
+
+    return -1;
 }

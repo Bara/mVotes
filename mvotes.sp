@@ -6,9 +6,12 @@
 #include "mvotes/globals.sp"
 #include "mvotes/stocks.sp"
 #include "mvotes/sql.sp"
+#include "mvotes/natives.sp"
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
+    CreateNative("MVotes_CreatePoll", Native_CreatePoll);
+
     RegPluginLibrary("mvotes");
 
     return APLRes_Success;
@@ -53,5 +56,7 @@ public Action Timer_AddTestPoll(Handle timer)
 
         Format(sBuffer, sizeof(sBuffer), "Test Vote %d", i);
         CreatePoll(-1, sBuffer, GetRandomInt(5, 1000), aTest);
+        // Native example:
+        // MVotes_CreatePoll(-1, sBuffer, 1440, aTest);
     }
 }
