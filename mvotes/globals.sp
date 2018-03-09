@@ -4,6 +4,7 @@ ConVar g_cDebug = null;
 ConVar g_cEntry = null;
 ConVar g_cMinOptions = null;
 ConVar g_cMinLength = null;
+ConVar g_cMessageAll = null;
 
 int g_iCreateTables = -1;
 

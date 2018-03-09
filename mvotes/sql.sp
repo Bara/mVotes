@@ -319,5 +319,10 @@ public void sqlInsertOptions(Database db, DBResultSet results, const char[] erro
         {
             LogMessage("[MVotes.sqlLoadOptions.Cache] iOptionID: %d, iPoll: %d, sOption: %s", iOption[eID], iOption[ePoll], iOption[eOption]);
         }
+
+        if (g_cMessageAll.BoolValue)
+        {
+            PrintToChatAll("The poll \"%s\" is now available!", sTitle);
+        }
     }
 }

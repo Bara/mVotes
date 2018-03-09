@@ -60,7 +60,7 @@ stock bool IsClientValid(int client)
 	return false;
 }
 
-stock void CreatePoll(int client = -1, const char[] title, int length, ArrayList options)
+stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList options)
 {
     if (g_cDebug.BoolValue)
     {
