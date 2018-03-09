@@ -49,6 +49,7 @@ public Action Timer_AddTestPoll(Handle timer)
 {
     char sBuffer[64];
 
+    // Just to fill the database with some polls and options
     for (int i = 0; i < 3; i++)
     {
         ArrayList aTest = new ArrayList(24);
@@ -56,7 +57,7 @@ public Action Timer_AddTestPoll(Handle timer)
         aTest.PushString("No");
 
         Format(sBuffer, sizeof(sBuffer), "Test Vote %d", i);
-        CreatePoll(-1, sBuffer, GetRandomInt(5, 1000), aTest);
+        CreatePoll(-1, sBuffer, GetRandomInt(43800, 262800), aTest);
         // Native example:
         // MVotes_CreatePoll(-1, sBuffer, 1440, aTest);
     }
