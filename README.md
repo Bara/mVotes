@@ -5,3 +5,6 @@ Polls and Options are cached in an array to increase performance and reduce mysq
 
 ## ToDo
  - Uhm... too much to list all things
+
+## Known issues
+ - It's currently a dev version, bugs are welcome
