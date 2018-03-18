@@ -51,15 +51,15 @@ stock void UpdatePollStatus(int poll)
 
 stock bool IsClientValid(int client)
 {
-	if (client > 0 && client <= MaxClients)
-	{
-		if (IsClientInGame(client) && !IsFakeClient(client) && !IsClientSourceTV(client))
-		{
-			return true;
-		}
-	}
-	
-	return false;
+    if (client > 0 && client <= MaxClients)
+    {
+        if (IsClientInGame(client) && !IsFakeClient(client) && !IsClientSourceTV(client))
+        {
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList options)
@@ -257,12 +257,12 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
         // PlayerVote(client, iPoll, iOption);
     }
     else if (action == MenuAction_Cancel)
-	{
-		if (param == MenuCancel_ExitBack)
-		{
-			ListVotes(client);
-		}
-	}
+    {
+        if (param == MenuCancel_ExitBack)
+        {
+            ListVotes(client);
+        }
+    }
     else if (action == MenuAction_End)
     {
         delete menu;
@@ -271,19 +271,19 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
 
 void PrintToBaraConsole(const char[] message, any ...) 
 {
-	LoopValidClients(i)
-	{
-		char steamid[64];
-		GetClientAuthId(i, AuthId_Steam2, steamid, sizeof(steamid));
-		
-		if (StrEqual(steamid, "STEAM_1:1:40828751", false))
-		{
-			char sBuffer[MAX_MESSAGE_LENGTH];
-			VFormat(sBuffer, sizeof(sBuffer), message, 2);
+    LoopValidClients(i)
+    {
+        char steamid[64];
+        GetClientAuthId(i, AuthId_Steam2, steamid, sizeof(steamid));
+        
+        if (StrEqual(steamid, "STEAM_1:1:40828751", false))
+        {
+            char sBuffer[MAX_MESSAGE_LENGTH];
+            VFormat(sBuffer, sizeof(sBuffer), message, 2);
 
-			PrintToConsole(i, sBuffer);
-		}
-	}
+            PrintToConsole(i, sBuffer);
+        }
+    }
 }
 
 int GetActivePolls()

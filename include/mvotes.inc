@@ -13,18 +13,18 @@ native void MVotes_CreatePoll(int client = -1, const char[] title, int length, A
 
 public SharedPlugin __pl_mvotes =
 {
-	name = "mvotes",
-	file = "mvotes.smx",
+    name = "mvotes",
+    file = "mvotes.smx",
 #if defined REQUIRE_PLUGIN
-	required = 1,
+    required = 1,
 #else
-	required = 0,
+    required = 0,
 #endif
 };
 
 #if !defined REQUIRE_PLUGIN
 public __pl_mvotes_SetNTVOptional()
 {
-	MarkNativeAsOptional("MVotes_CreatePoll");
+    MarkNativeAsOptional("MVotes_CreatePoll");
 }
 #endif
