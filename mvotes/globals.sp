@@ -15,7 +15,7 @@ enum ePolls
     eID = 0,
     bool:eStatus,
     eCreated,
-    eExipre,
+    eExpire,
     String:eTitle[64]
 };
 

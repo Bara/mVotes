@@ -153,15 +153,15 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
                     iPolls[eID] = iPoll;
                     iPolls[eStatus] = bStatus;
                     iPolls[eCreated] = iCreated;
-                    iPolls[eExipre] = iExpire;
+                    iPolls[eExpire] = iExpire;
                     Format(iPolls[eTitle], sizeof(sTitle), sTitle);
 
                     g_aPolls.PushArray(iPolls[0]);
 
                     if (g_cDebug.BoolValue)
                     {
-                        LogMessage("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExipre], iPolls[eTitle]);
-                        PrintToBaraConsole("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExipre], iPolls[eTitle]);
+                        LogMessage("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExpire], iPolls[eTitle]);
+                        PrintToBaraConsole("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExpire], iPolls[eTitle]);
                     }
 
                     char sOptions[128];
@@ -283,15 +283,15 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
         iPolls[eID] = iPoll;
         iPolls[eStatus] = bStatus;
         iPolls[eCreated] = iCreated;
-        iPolls[eExipre] = iExpire;
+        iPolls[eExpire] = iExpire;
         Format(iPolls[eTitle], sizeof(sTitle), sTitle);
 
         g_aPolls.PushArray(iPolls[0]);
 
         if (g_cDebug.BoolValue)
         {
-            LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExipre], iPolls[eTitle]);
-            PrintToBaraConsole("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExipre], iPolls[eTitle]);
+            LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExpire], iPolls[eTitle]);
+            PrintToBaraConsole("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExpire], iPolls[eTitle]);
         }
 
         for (int i = 0; i < aOptions.Length; i++)
