@@ -159,7 +159,7 @@ void ListVotes(int client)
         int iPolls[ePolls];
         g_aPolls.GetArray(i, iPolls[0]);
 
-        if (iPolls[eExipre] <= GetTime())
+        if (iPolls[eExpire] <= GetTime() || !iPolls[eStatus])
         {
             UpdatePollStatus(iPolls[eID]);
             continue;
@@ -220,7 +220,6 @@ void ListPollOptions(int client, int poll)
         if (poll == iOptions[ePoll])
         {
             char sParam[24];
-            // poll.option
             Format(sParam, sizeof(sParam), "%d.%d", poll, iOptions[eID]);
 
             char sOption[64];
@@ -295,7 +294,7 @@ int GetActivePolls()
         int iPolls[ePolls];
         g_aPolls.GetArray(i, iPolls[0]);
 
-        if (iPolls[eExipre] <= GetTime())
+        if (iPolls[eExpire] <= GetTime() || !iPolls[eStatus])
         {
             UpdatePollStatus(iPolls[eID]);
             continue;
