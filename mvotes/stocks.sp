@@ -169,7 +169,8 @@ void ListVotes(int client)
         IntToString(iPolls[eID], sBuffer, sizeof(sBuffer));
 
         char sTitle[64];
-        Format(sTitle, sizeof(sTitle), "[%d] %s", iPolls[eID], iPolls[eTitle]);
+        // Format(sTitle, sizeof(sTitle), "[%d] %s", iPolls[eID], iPolls[eTitle]);
+        Format(sTitle, sizeof(sTitle), "%s", iPolls[eTitle]);
 
         menu.AddItem(sBuffer, sTitle);
     }
@@ -223,7 +224,8 @@ void ListPollOptions(int client, int poll)
             Format(sParam, sizeof(sParam), "%d.%d", poll, iOptions[eID]);
 
             char sOption[64];
-            Format(sOption, sizeof(sOption), "[%d] %s", iOptions[eID], iOptions[eOption]);
+            // Format(sOption, sizeof(sOption), "[%d] %s", iOptions[eID], iOptions[eOption]);
+            Format(sOption, sizeof(sOption), "%s", iOptions[eOption]);
 
             menu.AddItem(sParam, sOption);
         }
@@ -253,7 +255,7 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
             PrintToBaraConsole("[MVotes.Menu_OptionList] Poll: %d (String: %s), Option: %d (String: %s)", iPoll, sIDs[0], iOption, sIDs[1]);
         }
 
-        // PlayerVote(client, iPoll, iOption);
+        PlayerVote(client, iPoll, iOption);
     }
     else if (action == MenuAction_Cancel)
     {
@@ -266,6 +268,43 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
     {
         delete menu;
     }
+}
+
+void PlayerVote(int client, int poll, int option)
+{
+    char sCommunity[18];
+
+    if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
+    {
+        return;
+    }
+
+    char sInsertUpdate[768];
+
+    if (g_cAllowRevote.BoolValue)
+    {
+        g_dDatabase.Format(sInsertUpdate, sizeof(sInsertUpdate),
+        "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES (UNIX_TIMESTAMP(), %d, %d, \"%s\", \"%N\") \
+        ON DUPLICATE KEY UPDATE time = UNIX_TIMESTAMP(), option = %d, name = \"%N\";", poll, option, sCommunity, client, option, client);
+    }
+    else
+    {
+        g_dDatabase.Format(sInsertUpdate, sizeof(sInsertUpdate),
+        "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES (UNIX_TIMESTAMP(), %d, %d, \"%s\", \"%N\");",
+        poll, option, sCommunity, client);
+    }
+
+    if (g_cDebug.BoolValue)
+    {
+        LogMessage("[MVotes.PlayerVote] InsertUpdate Query: %s", sInsertUpdate);
+        PrintToBaraConsole("[MVotes.PlayerVote] InsertUpdate Query: %s", sInsertUpdate);
+    }
+
+    DataPack dp = new DataPack();
+    dp.WriteCell(GetClientUserId(client));
+    dp.WriteCell(poll);
+    dp.WriteCell(option);
+    g_dDatabase.Query(sqlPlayerVote, sInsertUpdate, dp);
 }
 
 void PrintToBaraConsole(const char[] message, any ...) 

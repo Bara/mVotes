@@ -369,3 +369,59 @@ public void sqlInsertOptions(Database db, DBResultSet results, const char[] erro
         }
     }
 }
+
+public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, DataPack dp)
+{
+    if (db == null || strlen(error) > 0)
+    {
+        LogError("[MVotes.sqlPlayerVote] Query failed: %s", error);
+        PrintToBaraConsole("[MVotes.sqlPlayerVote] Query failed: %s", error);
+        delete dp;
+        return;
+    }
+    else
+    {
+        dp.Reset();
+
+        int userid = dp.ReadCell();
+        int poll = dp.ReadCell();
+        int option = dp.ReadCell();
+
+        delete dp;
+
+        int client = GetClientOfUserId(userid);
+
+        if (!IsClientValid(client))
+        {
+            return;
+        }
+
+        char sTitle[64], sOption[32];
+
+        for (int i = 0; i < g_aPolls.Length; i++)
+        {
+            int iPolls[ePolls];
+            g_aPolls.GetArray(i, iPolls[0]);
+
+            if (iPolls[eID] == poll)
+            {
+                strcopy(sTitle, sizeof(sTitle), iPolls[eTitle]);
+                break;
+            }
+        }
+
+        for (int i = 0; i < g_aOptions.Length; i++)
+        {
+            int iOptions[eOptions];
+            g_aOptions.GetArray(i, iOptions[0]);
+
+            if (iOptions[eID] == option)
+            {
+                strcopy(sOption, sizeof(sOption), iOptions[eOption]);
+                break;
+            }
+        }
+
+        CPrintToChat(client, "{darkred}[MVotes] {default}You voted for {darkblue}%s {default}with {darkblue}%s{default}.", sTitle, sOption);
+    }
+}

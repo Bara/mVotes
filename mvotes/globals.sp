@@ -1,10 +1,12 @@
 Database g_dDatabase = null;
 
 ConVar g_cDebug = null;
+ConVar g_cAddTests = null;
 ConVar g_cEntry = null;
 ConVar g_cMinOptions = null;
 ConVar g_cMinLength = null;
 ConVar g_cMessageAll = null;
+ConVar g_cAllowRevote = null;
 
 int g_iCreateTables = -1;
 
@@ -27,7 +29,19 @@ enum eOptions
     eID = 0,
     ePoll,
     String:eOption[32]
-}
+};
 
 int g_iOptions[eOptions];
 ArrayList g_aOptions = null;
+
+enum eVotes
+{
+    eID = 0,
+    eTime,
+    ePollID,
+    eOptionID,
+    String:eCommunity[18]
+};
+
+int g_iVotes[eVotes];
+ArrayList g_aVotes = null;
