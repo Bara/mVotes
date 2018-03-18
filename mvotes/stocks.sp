@@ -24,11 +24,12 @@ stock void LoadPolls()
     g_aOptions = new ArrayList(sizeof(g_iOptions));
     g_aPolls = new ArrayList(sizeof(g_iPolls));
 
-    char sPolls[] = "SELECT id, status, title, created, expire FROM mvotes_polls WHERE status = 1;";
+    char sPolls[] = "SELECT id, status, title, created, expire FROM mvotes_polls WHERE status = 1 ORDER BY id ASC;";
 
     if (g_cDebug.BoolValue)
     {
         LogMessage("[CreateTables.LoadPolls] Polls Query: %s", sPolls);
+        PrintToBaraConsole("[CreateTables.LoadPolls] Polls Query: %s", sPolls);
     }
 
     g_dDatabase.Query(sqlLoadPolls, sPolls);
@@ -42,16 +43,17 @@ stock void UpdatePollStatus(int poll)
     if (g_cDebug.BoolValue)
     {
         LogMessage("[MVotes.UpdatePollStatus] Update Query: %s", sUpdate);
+        PrintToBaraConsole("[MVotes.UpdatePollStatus] Update Query: %s", sUpdate);
     }
 
-    g_dDatabase.Query(sqlUpdatePollStatus, sUpdate);
+    g_dDatabase.Query(sqlUpdatePollStatus, sUpdate, poll);
 }
 
 stock bool IsClientValid(int client)
 {
 	if (client > 0 && client <= MaxClients)
 	{
-		if(IsClientInGame(client) && !IsFakeClient(client) && !IsClientSourceTV(client))
+		if (IsClientInGame(client) && !IsFakeClient(client) && !IsClientSourceTV(client))
 		{
 			return true;
 		}
@@ -65,6 +67,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     if (g_cDebug.BoolValue)
     {
         LogMessage("[MVotes.CreatePoll] Poll \"%s\" (Length: %d) will be created...", title, length);
+        PrintToBaraConsole("[MVotes.CreatePoll] Poll \"%s\" (Length: %d) will be created...", title, length);
     }
 
     if (options.Length < g_cMinOptions.IntValue)
@@ -72,6 +75,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.CreatePoll] Poll \"%s\" can't created (We need %d or more options for a vote)...", title, g_cMinOptions.IntValue);
+            PrintToBaraConsole("[MVotes.CreatePoll] Poll \"%s\" can't created (We need %d or more options for a vote)...", title, g_cMinOptions.IntValue);
         }
 
         return 2;
@@ -82,6 +86,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.CreatePoll] Poll \"%s\" can't created (Length must at least %d minutes)...", title, g_cMinLength.IntValue);
+            PrintToBaraConsole("[MVotes.CreatePoll] Poll \"%s\" can't created (Length must at least %d minutes)...", title, g_cMinLength.IntValue);
         }
 
         return 1;
@@ -95,6 +100,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.CreatePoll] Poll \"%s\" can't created (current time it higher as expire time)...", title, g_iTime, g_iExpire);
+            PrintToBaraConsole("[MVotes.CreatePoll] Poll \"%s\" can't created (current time it higher as expire time)...", title, g_iTime, g_iExpire);
         }
 
         return 0;
@@ -110,6 +116,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     if (g_cDebug.BoolValue)
     {
         LogMessage("[MVotes.CreatePoll] Poll \"%s\", Admin: %s", title, sAdmin);
+        PrintToBaraConsole("[MVotes.CreatePoll] Poll \"%s\", Admin: %s", title, sAdmin);
     }
 
     int iPort = GetConVarInt(FindConVar("hostport"));
@@ -129,6 +136,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     if (g_cDebug.BoolValue)
     {
         LogMessage("[MVotes.CreatePoll] Insert Query: %s", sInsert);
+        PrintToBaraConsole("[MVotes.CreatePoll] Insert Query: %s", sInsert);
     }
 
     DataPack dp = new DataPack();
@@ -139,4 +147,165 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     dp.WriteCell(options);
 
     return -1;
+}
+
+void ListVotes(int client)
+{
+    Menu menu = new Menu(Menu_PollList);
+    menu.SetTitle("Active polls:");
+
+    for (int i = 0; i < g_aPolls.Length; i++)
+    {
+        int iPolls[ePolls];
+        g_aPolls.GetArray(i, iPolls[0]);
+
+        if (iPolls[eExipre] <= GetTime())
+        {
+            UpdatePollStatus(iPolls[eID]);
+            continue;
+        }
+
+        char sBuffer[12];
+        IntToString(iPolls[eID], sBuffer, sizeof(sBuffer));
+
+        char sTitle[64];
+        Format(sTitle, sizeof(sTitle), "[%d] %s", iPolls[eID], iPolls[eTitle]);
+
+        menu.AddItem(sBuffer, sTitle);
+    }
+
+    menu.ExitButton = true;
+    menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int Menu_PollList(Menu menu, MenuAction action, int client, int param)
+{
+    if (action == MenuAction_Select)
+    {
+        char sBuffer[12];
+        menu.GetItem(param, sBuffer, sizeof(sBuffer));
+        int iPoll = StringToInt(sBuffer);
+
+        ListPollOptions(client, iPoll);
+    }
+    else if (action == MenuAction_End)
+    {
+        delete menu;
+    }
+}
+
+void ListPollOptions(int client, int poll)
+{
+    Menu menu = new Menu(Menu_OptionList);
+
+    for (int i = 0; i < g_aPolls.Length; i++)
+    {
+        int iPolls[ePolls];
+        g_aPolls.GetArray(i, iPolls[0]);
+
+        if (iPolls[eID] != poll)
+        {
+            continue;
+        }
+
+        menu.SetTitle(iPolls[eTitle]);
+        break;
+    }
+
+    for (int i = 0; i < g_aOptions.Length; i++)
+    {
+        int iOptions[ePolls];
+        g_aOptions.GetArray(i, iOptions[0]);
+
+        if (poll == iOptions[ePoll])
+        {
+            char sParam[24];
+            // poll.option
+            Format(sParam, sizeof(sParam), "%d.%d", poll, iOptions[eID]);
+
+            char sOption[64];
+            Format(sOption, sizeof(sOption), "[%d] %s", iOptions[eID], iOptions[eOption]);
+
+            menu.AddItem(sParam, sOption);
+        }
+    }
+
+    menu.ExitBackButton = true;
+    menu.ExitButton = false;
+    menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
+{
+    if (action == MenuAction_Select)
+    {
+        char sBuffer[24];
+        menu.GetItem(param, sBuffer, sizeof(sBuffer));
+
+        char sIDs[2][12];
+        ExplodeString(sBuffer, ".", sIDs, sizeof(sIDs), sizeof(sIDs[]));
+
+        int iPoll = StringToInt(sIDs[0]);
+        int iOption = StringToInt(sIDs[1]);
+
+        if (g_cDebug.BoolValue)
+        {
+            LogMessage("[MVotes.Menu_OptionList] Poll: %d (String: %s), Option: %d (String: %s)", iPoll, sIDs[0], iOption, sIDs[1]);
+            PrintToBaraConsole("[MVotes.Menu_OptionList] Poll: %d (String: %s), Option: %d (String: %s)", iPoll, sIDs[0], iOption, sIDs[1]);
+        }
+
+        // PlayerVote(client, iPoll, iOption);
+    }
+    else if (action == MenuAction_Cancel)
+	{
+		if (param == MenuCancel_ExitBack)
+		{
+			ListVotes(client);
+		}
+	}
+    else if (action == MenuAction_End)
+    {
+        delete menu;
+    }
+}
+
+void PrintToBaraConsole(const char[] message, any ...) 
+{
+	LoopValidClients(i)
+	{
+		char steamid[64];
+		GetClientAuthId(i, AuthId_Steam2, steamid, sizeof(steamid));
+		
+		if (StrEqual(steamid, "STEAM_1:1:40828751", false))
+		{
+			char sBuffer[MAX_MESSAGE_LENGTH];
+			VFormat(sBuffer, sizeof(sBuffer), message, 2);
+
+			PrintToConsole(i, sBuffer);
+		}
+	}
+}
+
+int GetActivePolls()
+{
+    int iVotes = 0;
+
+    for (int i = 0; i < g_aPolls.Length; i++)
+    {
+        int iPolls[ePolls];
+        g_aPolls.GetArray(i, iPolls[0]);
+
+        if (iPolls[eExipre] <= GetTime())
+        {
+            UpdatePollStatus(iPolls[eID]);
+            continue;
+        }
+
+        if (iPolls[eStatus])
+        {
+            iVotes++;
+        }
+    }
+
+    return iVotes;
 }

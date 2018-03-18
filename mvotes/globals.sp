@@ -8,6 +8,8 @@ ConVar g_cMessageAll = null;
 
 int g_iCreateTables = -1;
 
+bool g_bLoaded = false;
+
 enum ePolls
 {
     eID = 0,

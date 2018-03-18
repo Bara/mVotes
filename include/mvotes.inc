@@ -9,7 +9,7 @@
  * Return: -1 - Looks good, 0 - Invalid time/expire time, 1 - Invalid poll length (See mvotes_min_length), 2 - Invalid options (See mvotes_min_options)
  *
  */
-native void MVotes_CreateVote(int client = -1, const char[] title, int length, ArrayList options)
+native void MVotes_CreatePoll(int client = -1, const char[] title, int length, ArrayList options);
 
 public SharedPlugin __pl_mvotes =
 {
@@ -25,6 +25,6 @@ public SharedPlugin __pl_mvotes =
 #if !defined REQUIRE_PLUGIN
 public __pl_mvotes_SetNTVOptional()
 {
-	MarkNativeAsOptional("MVotes_CreateVote");
+	MarkNativeAsOptional("MVotes_CreatePoll");
 }
 #endif
