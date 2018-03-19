@@ -263,7 +263,12 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
             if (iPolls[eExpire] <= GetTime() || !iPolls[eStatus])
             {
                 ClosePoll(iPolls[eID]);
-                CPrintToChat(client, "{darkred}[MVotes] {default}The poll \"%s\" is no longer available.", iPolls[eTitle]);
+
+                if (iPoll == iPolls[eID])
+                {
+                    CPrintToChat(client, "{darkred}[MVotes] {default}The poll \"%s\" is no longer available.", iPolls[eTitle]);
+                }
+                
                 return;
             }
         }
