@@ -6,6 +6,7 @@
 #include <mvotes>
 
 #define LoopValidClients(%1) for (int %1 = 1; %1 <= MaxClients; %1++) if (IsClientValid(%1))
+
 #define LoopPollsArray(%1) for (int %1 = 0; %1 < g_aPolls.Length; %1++)
 #define LoopOptionsArray(%1) for (int %1 = 0; %1 < g_aOptions.Length; %1++)
 #define LoopVotesArray(%1) for (int %1 = 0; %1 < g_aVotes.Length; %1++)
@@ -115,5 +116,5 @@ public Action Event_PlayerDeathPost(Event event, const char[] name, bool dontBro
         return;
     }
 
-    CPrintToChat(client, "{darkred}[MVotes] {default}We've currently {darkblue}%d {default}active votes.", GetActivePolls());
+    CPrintToChat(client, "{darkred}[MVotes] {default}We've currently {darkblue}%d {default}active votes. Type {darkblue}!votes {default}to view all availables polls.", GetActivePolls());
 }
