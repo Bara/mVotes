@@ -21,6 +21,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     g_bLoaded = false;
 
     CreateNative("MVotes_CreatePoll", Native_CreatePoll);
+    CreateNative("MVotes_ClosePoll", Native_ClosePoll);
 
     RegPluginLibrary("mvotes");
 

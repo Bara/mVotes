@@ -3,7 +3,6 @@ Polls and Options are cached in an array to increase performance and reduce mysq
 
 ## ToDo
  - Natives:
-   - Close polls
    - Extend polls
  - Enable/Disable Revoting
  - Translations

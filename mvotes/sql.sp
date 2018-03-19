@@ -143,7 +143,7 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
                 if (iExpire < GetTime())
                 {
                     bStatus = false;
-                    UpdatePollStatus(iPoll);
+                    ClosePoll(iPoll);
                 }
 
                 if (bStatus)
@@ -221,11 +221,11 @@ public void sqlLoadOptions(Database db, DBResultSet results, const char[] error,
     }
 }
 
-public void sqlUpdatePollStatus(Database db, DBResultSet results, const char[] error, int poll)
+public void sqlClosePoll(Database db, DBResultSet results, const char[] error, int poll)
 {
     if (db == null || strlen(error) > 0)
     {
-        SetFailState("[MVotes.sqlUpdatePollStatus] Query failed: %s", error);
+        SetFailState("[MVotes.sqlClosePoll] Query failed: %s", error);
         return;
     }
     else
@@ -480,7 +480,7 @@ public void sqlLoadClientVotes(Database db, DBResultSet results, const char[] er
                             }
                             else
                             {
-                                UpdatePollStatus(iPolls[eID]);
+                                ClosePoll(iPolls[eID]);
                                 continue;
                             }
                         }

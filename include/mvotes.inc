@@ -10,6 +10,8 @@
  */
 native int MVotes_CreatePoll(int client = -1, const char[] title, int length, ArrayList options);
 
+native void MVotes_ClosePoll(int pollID);
+
 public SharedPlugin __pl_mvotes =
 {
     name = "mvotes",

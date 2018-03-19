@@ -11,3 +11,33 @@ public int Native_CreatePoll(Handle plugin, int numParams)
 
     return CreatePoll(client, sTitle, iLength, aOptions);
 }
+
+public int Native_ClosePoll(Handle plugin, int numParams)
+{
+    int poll = GetNativeCell(1);
+
+    bool bFound = false;
+
+    LoopPollsArray(i)
+    {
+        int iPolls[ePolls];
+        g_aPolls.GetArray(i, iPolls[0]);
+
+        if (iPolls[eExpire] <= GetTime())
+        {
+            ClosePoll(iPolls[eID]);
+            continue;
+        }
+
+        if (iPolls[eID] == poll)
+        {
+            bFound = true;
+            break;
+        }
+    }
+
+    if (bFound)
+    {
+        ClosePoll(poll);
+    }
+}

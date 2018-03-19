@@ -41,18 +41,18 @@ stock void LoadPolls()
     g_dDatabase.Query(sqlLoadPolls, sPolls);
 }
 
-stock void UpdatePollStatus(int poll)
+stock void ClosePoll(int poll)
 {
     char sUpdate[128];
     Format(sUpdate, sizeof(sUpdate), "UPDATE mvotes_polls SET status = 0 WHERE id = %d;", poll);
 
     if (g_cDebug.BoolValue)
     {
-        LogMessage("[MVotes.UpdatePollStatus] Update Query: %s", sUpdate);
-        PrintToBaraConsole("[MVotes.UpdatePollStatus] Update Query: %s", sUpdate);
+        LogMessage("[MVotes.ClosePoll] Update Query: %s", sUpdate);
+        PrintToBaraConsole("[MVotes.ClosePoll] Update Query: %s", sUpdate);
     }
 
-    g_dDatabase.Query(sqlUpdatePollStatus, sUpdate, poll);
+    g_dDatabase.Query(sqlClosePoll, sUpdate, poll);
 }
 
 stock bool IsClientValid(int client)
@@ -167,7 +167,7 @@ void ListVotes(int client)
 
         if (iPolls[eExpire] <= GetTime() || !iPolls[eStatus])
         {
-            UpdatePollStatus(iPolls[eID]);
+            ClosePoll(iPolls[eID]);
             continue;
         }
 
@@ -254,6 +254,19 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
 
         int iPoll = StringToInt(sIDs[0]);
         int iOption = StringToInt(sIDs[1]);
+
+        LoopPollsArray(i)
+        {
+            int iPolls[ePolls];
+            g_aPolls.GetArray(i, iPolls[0]);
+
+            if (iPolls[eExpire] <= GetTime() || !iPolls[eStatus])
+            {
+                ClosePoll(iPolls[eID]);
+                CPrintToChat(client, "{darkred}[MVotes] {default}The poll \"%s\" is no longer available.", iPolls[eTitle]);
+                return;
+            }
+        }
 
         if (g_cDebug.BoolValue)
         {
@@ -405,7 +418,7 @@ int GetActivePolls()
 
         if (iPolls[eExpire] <= GetTime() || !iPolls[eStatus])
         {
-            UpdatePollStatus(iPolls[eID]);
+            ClosePoll(iPolls[eID]);
             continue;
         }
 
