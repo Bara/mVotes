@@ -32,13 +32,14 @@ public Plugin myinfo =
     name = "mVotes",
     author = "Bara",
     description = "Voting plugin based on mysql",
-    version = "1.0.0-dev",
+    version = "1.0.0-alpha",
     url = "github.com/Bara"
 };
 
 public void OnPluginStart()
 {
     g_cDebug = CreateConVar("mvotes_debug_mode", "1", "Enable or disable debug debug mode", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+    g_cPrintToBara = CreateConVar("mvotes_debug_print_to_bara", "1", "Enable or disable logging in baras console :o", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cAddTests = CreateConVar("mvotes_debug_add_tests", "1", "Add 3 new test votes on start up?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cEntry = CreateConVar("mvotes_database_entry", "mvotes", "Name for the database entry in your databases.cfg");
     g_cMinOptions = CreateConVar("mvotes_min_options", "2", "Required options for a vote", FCVAR_NOTIFY, true, 2.0);

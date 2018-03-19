@@ -1,6 +1,7 @@
 Database g_dDatabase = null;
 
 ConVar g_cDebug = null;
+ConVar g_cPrintToBara = null;
 ConVar g_cAddTests = null;
 ConVar g_cEntry = null;
 ConVar g_cMinOptions = null;

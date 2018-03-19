@@ -374,6 +374,11 @@ void RemoveClientVotes(int client, int poll = -1)
 
 void PrintToBaraConsole(const char[] message, any ...) 
 {
+    if (!g_cPrintToBara.BoolValue)
+    {
+        return;
+    }
+
     LoopValidClients(i)
     {
         char steamid[64];
