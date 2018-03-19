@@ -341,7 +341,7 @@ void LoadClientVotes(int client)
     g_dDatabase.Query(sqlLoadClientVotes, sSelect, GetClientUserId(client));
 }
 
-void RemoveClientVotes(int client)
+void RemoveClientVotes(int client, int poll = -1)
 {
     char sCommunity[18];
 
@@ -357,7 +357,17 @@ void RemoveClientVotes(int client)
 
         if (StrEqual(sCommunity, iVotes[eCommunity], false))
         {
-            g_aVotes.Erase(i);
+            if (poll == -1)
+            {
+                g_aVotes.Erase(i);
+            }
+            else
+            {
+                if (iVotes[ePollID] == poll)
+                {
+                    g_aVotes.Erase(i);
+                }
+            }
         }
     }
 }

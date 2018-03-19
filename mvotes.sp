@@ -5,7 +5,7 @@
 #include <multicolors>
 #include <mvotes>
 
-#define LoopValidClients(%1) for(int %1 = 1; %1 <= MaxClients; %1++) if(IsClientValid(%1))
+#define LoopValidClients(%1) for (int %1 = 1; %1 <= MaxClients; %1++) if (IsClientValid(%1))
 #define LoopPollsArray(%1) for (int %1 = 0; %1 < g_aPolls.Length; %1++)
 #define LoopOptionsArray(%1) for (int %1 = 0; %1 < g_aOptions.Length; %1++)
 #define LoopVotesArray(%1) for (int %1 = 0; %1 < g_aVotes.Length; %1++)

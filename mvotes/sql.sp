@@ -252,6 +252,11 @@ public void sqlUpdatePollStatus(Database db, DBResultSet results, const char[] e
                 g_aOptions.Erase(i);
             }
         }
+
+        LoopValidClients(i)
+        {
+            RemoveClientVotes(i, poll);
+        }
     }
 }
 
