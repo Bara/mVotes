@@ -170,6 +170,11 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
                 }
             }
         }
+
+        LoopValidClients(client)
+        {
+            LoadClientVotes(client);
+        }
     }
 }
 
@@ -225,7 +230,7 @@ public void sqlUpdatePollStatus(Database db, DBResultSet results, const char[] e
     }
     else
     {
-        for (int i = 0; i < g_aPolls.Length; i++)
+        LoopPollsArray(i)
         {
             int iPolls[ePolls];
             g_aPolls.GetArray(i, iPolls[0]);
@@ -237,7 +242,7 @@ public void sqlUpdatePollStatus(Database db, DBResultSet results, const char[] e
             }
         }
 
-        for (int i = 0; i < g_aOptions.Length; i++)
+        LoopOptionsArray(i)
         {
             int iOptions[eOption];
             g_aOptions.GetArray(i, iOptions[0]);
@@ -294,7 +299,7 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
             PrintToBaraConsole("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExpire], iPolls[eTitle]);
         }
 
-        for (int i = 0; i < aOptions.Length; i++)
+        LoopOptionsArray(i)
         {
             char sOption[32];
             aOptions.GetString(i, sOption, sizeof(sOption));
@@ -398,7 +403,7 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
 
         char sTitle[64], sOption[32];
 
-        for (int i = 0; i < g_aPolls.Length; i++)
+        LoopPollsArray(i)
         {
             int iPolls[ePolls];
             g_aPolls.GetArray(i, iPolls[0]);
@@ -410,7 +415,7 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
             }
         }
 
-        for (int i = 0; i < g_aOptions.Length; i++)
+        LoopOptionsArray(i)
         {
             int iOptions[eOptions];
             g_aOptions.GetArray(i, iOptions[0]);
@@ -423,5 +428,83 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
         }
 
         CPrintToChat(client, "{darkred}[MVotes] {default}You voted for {darkblue}%s {default}with {darkblue}%s{default}.", sTitle, sOption);
+    }
+}
+
+public void sqlLoadClientVotes(Database db, DBResultSet results, const char[] error, int userid)
+{
+    if (db == null || strlen(error) > 0)
+    {
+        LogError("[MVotes.sqlLoadClientVotes] Query failed: %s", error);
+        PrintToBaraConsole("[MVotes.sqlLoadClientVotes] Query failed: %s", error);
+        return;
+    }
+    else
+    {
+        int client = GetClientOfUserId(userid);
+
+        if (IsClientValid(client))
+        {
+            if (g_cDebug.BoolValue)
+            {
+                LogMessage("[MVotes.sqlLoadClientVotes] HasResults: %d RowCount: %d", results.HasResults, results.RowCount);
+                PrintToBaraConsole("[MVotes.sqlLoadClientVotes] HasResults: %d RowCount: %d", results.HasResults, results.RowCount);
+            }
+
+            if (results.HasResults)
+            {
+                while (results.FetchRow())
+                {
+                    int iID = results.FetchInt(0);
+                    int iTime = results.FetchInt(1);
+                    int iPoll = results.FetchInt(2);
+                    int iOption = results.FetchInt(3);
+
+                    bool bStatus = false;
+
+                    LoopPollsArray(i)
+                    {
+                        int iPolls[ePolls];
+                        g_aPolls.GetArray(i, iPolls[0]);
+
+                        if (iPolls[eID] == iPoll)
+                        {
+                            if (iPolls[eExpire] > GetTime() && iPolls[eStatus])
+                            {
+                                bStatus = true;
+                            }
+                            else
+                            {
+                                UpdatePollStatus(iPolls[eID]);
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (!bStatus)
+                    {
+                        continue;
+                    }
+
+                    char sCommunity[18];
+                    results.FetchString(4, sCommunity, sizeof(sCommunity));
+
+                    int iVotes[eVotes];
+                    iVotes[eID] = iID;
+                    iVotes[eTime] = iTime;
+                    iVotes[ePollID] = iPoll;
+                    iVotes[eOptionID] = iOption;
+                    Format(iVotes[eCommunity], sizeof(sCommunity), sCommunity);
+
+                    g_aVotes.PushArray(iVotes[0]);
+
+                    if (g_cDebug.BoolValue)
+                    {
+                        LogMessage("[MVotes.sqlLoadClientVotes.Cache] iID: %d, iTime: %d, iPoll: %d, iOption: %d, sCommunity: %s", iVotes[eID], iVotes[eTime], iVotes[ePollID], iVotes[eOptionID], iVotes[eCommunity]);
+                        PrintToBaraConsole("[MVotes.sqlLoadClientVotes.Cache] iID: %d, iTime: %d, iPoll: %d, iOption: %d, sCommunity: %s", iVotes[eID], iVotes[eTime], iVotes[ePollID], iVotes[eOptionID], iVotes[eCommunity]);
+                    }
+                }
+            }
+        }
     }
 }

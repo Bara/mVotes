@@ -21,8 +21,14 @@ stock void LoadPolls()
         g_aOptions.Clear();
     }
 
+    if (g_aVotes != null)
+    {
+        g_aVotes.Clear();
+    }
+
     g_aOptions = new ArrayList(sizeof(g_iOptions));
     g_aPolls = new ArrayList(sizeof(g_iPolls));
+    g_aVotes = new ArrayList(sizeof(g_iVotes));
 
     char sPolls[] = "SELECT id, status, title, created, expire FROM mvotes_polls WHERE status = 1 ORDER BY id ASC;";
 
@@ -154,7 +160,7 @@ void ListVotes(int client)
     Menu menu = new Menu(Menu_PollList);
     menu.SetTitle("Active polls:");
 
-    for (int i = 0; i < g_aPolls.Length; i++)
+    LoopPollsArray(i)
     {
         int iPolls[ePolls];
         g_aPolls.GetArray(i, iPolls[0]);
@@ -199,7 +205,7 @@ void ListPollOptions(int client, int poll)
 {
     Menu menu = new Menu(Menu_OptionList);
 
-    for (int i = 0; i < g_aPolls.Length; i++)
+    LoopPollsArray(i)
     {
         int iPolls[ePolls];
         g_aPolls.GetArray(i, iPolls[0]);
@@ -213,7 +219,7 @@ void ListPollOptions(int client, int poll)
         break;
     }
 
-    for (int i = 0; i < g_aOptions.Length; i++)
+    LoopOptionsArray(i)
     {
         int iOptions[ePolls];
         g_aOptions.GetArray(i, iOptions[0]);
@@ -281,6 +287,7 @@ void PlayerVote(int client, int poll, int option)
 
     char sInsertUpdate[768];
 
+    // TODO
     if (g_cAllowRevote.BoolValue)
     {
         g_dDatabase.Format(sInsertUpdate, sizeof(sInsertUpdate),
@@ -307,6 +314,54 @@ void PlayerVote(int client, int poll, int option)
     g_dDatabase.Query(sqlPlayerVote, sInsertUpdate, dp);
 }
 
+void LoadClientVotes(int client)
+{
+    if (!IsClientValid(client))
+    {
+        return;
+    }
+
+    char sCommunity[18];
+
+    if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
+    {
+        return;
+    }
+
+    char sSelect[128];
+
+    g_dDatabase.Format(sSelect, sizeof(sSelect), "SELECT id, time, poll, option, communityid FROM mvotes_votes WHERE communityid = \"%s\";", sCommunity);
+
+    if (g_cDebug.BoolValue)
+    {
+        LogMessage("[MVotes.LoadClientVotes] Select Query: %s", sSelect);
+        PrintToBaraConsole("[MVotes.LoadClientVotes] Select Query: %s", sSelect);
+    }
+
+    g_dDatabase.Query(sqlLoadClientVotes, sSelect, GetClientUserId(client));
+}
+
+void RemoveClientVotes(int client)
+{
+    char sCommunity[18];
+
+    if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
+    {
+        return;
+    }
+
+    LoopVotesArray(i)
+    {
+        int iVotes[eVotes];
+        g_aVotes.GetArray(i, iVotes[0]);
+
+        if (StrEqual(sCommunity, iVotes[eCommunity], false))
+        {
+            g_aVotes.Erase(i);
+        }
+    }
+}
+
 void PrintToBaraConsole(const char[] message, any ...) 
 {
     LoopValidClients(i)
@@ -328,7 +383,7 @@ int GetActivePolls()
 {
     int iVotes = 0;
 
-    for (int i = 0; i < g_aPolls.Length; i++)
+    LoopPollsArray(i)
     {
         int iPolls[ePolls];
         g_aPolls.GetArray(i, iPolls[0]);

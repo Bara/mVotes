@@ -6,6 +6,9 @@
 #include <mvotes>
 
 #define LoopValidClients(%1) for(int %1 = 1; %1 <= MaxClients; %1++) if(IsClientValid(%1))
+#define LoopPollsArray(%1) for (int %1 = 0; %1 < g_aPolls.Length; %1++)
+#define LoopOptionsArray(%1) for (int %1 = 0; %1 < g_aOptions.Length; %1++)
+#define LoopVotesArray(%1) for (int %1 = 0; %1 < g_aVotes.Length; %1++)
 
 #include "mvotes/globals.sp"
 #include "mvotes/stocks.sp"
@@ -69,6 +72,16 @@ public Action Timer_AddTestPoll(Handle timer)
         Format(sBuffer, sizeof(sBuffer), "Test Vote %d", GetRandomInt(100, 999));
         MVotes_CreatePoll(-1, sBuffer, GetRandomInt(43800, 262800), aTest);
     }
+}
+
+public void OnClientPostAdminCheck(int client)
+{
+	LoadClientVotes(client);
+}
+
+public void OnClientDisconnect(int client)
+{
+    RemoveClientVotes(client);
 }
 
 public Action Command_Votes(int client, int args)
