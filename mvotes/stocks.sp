@@ -11,20 +11,9 @@ stock void initSQL()
 
 stock void LoadPolls()
 {
-    if (g_aPolls != null)
-    {
-        g_aPolls.Clear();
-    }
-
-    if (g_aOptions != null)
-    {
-        g_aOptions.Clear();
-    }
-
-    if (g_aVotes != null)
-    {
-        g_aVotes.Clear();
-    }
+    delete g_aPolls;
+    delete g_aOptions;
+    delete g_aVotes;
 
     g_aOptions = new ArrayList(sizeof(g_iOptions));
     g_aPolls = new ArrayList(sizeof(g_iPolls));
