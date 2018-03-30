@@ -396,12 +396,20 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
         int userid = dp.ReadCell();
         int poll = dp.ReadCell();
         int option = dp.ReadCell();
+        int time = dp.ReadCell();
 
         delete dp;
 
         int client = GetClientOfUserId(userid);
 
         if (!IsClientValid(client))
+        {
+            return;
+        }
+
+
+        char sCommunity[18];
+        if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
         {
             return;
         }
@@ -433,6 +441,29 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
         }
 
         CPrintToChat(client, "{darkred}[MVotes] {default}You voted for {darkblue}%s {default}with {darkblue}%s{default}.", sTitle, sOption);
+
+        LoopVotesArray(i)
+        {
+            int iVotes[eVotes];
+            g_aVotes.GetArray(i, iVotes[0]);
+
+            if (StrEqual(sCommunity, iVotes[eCommunity], false))
+            {
+                if (iVotes[ePollID] == poll)
+                {
+                    g_aVotes.Erase(i);
+                }
+            }
+        }
+
+        int iVotes[eVotes];
+        iVotes[eID] = results.InsertId;
+        iVotes[eTime] = time;
+        iVotes[ePollID] = poll;
+        iVotes[eOptionID] = option;
+        Format(iVotes[eCommunity], sizeof(sCommunity), sCommunity);
+
+        g_aVotes.PushArray(iVotes[0]);
     }
 }
 

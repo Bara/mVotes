@@ -163,11 +163,59 @@ void ListVotes(int client)
         char sBuffer[12];
         IntToString(iPolls[eID], sBuffer, sizeof(sBuffer));
 
-        char sTitle[64];
-        // Format(sTitle, sizeof(sTitle), "[%d] %s", iPolls[eID], iPolls[eTitle]);
-        Format(sTitle, sizeof(sTitle), "%s", iPolls[eTitle]);
+        char sCommunity[18];
+        if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
+        {
+            return;
+        }
 
-        menu.AddItem(sBuffer, sTitle);
+        bool bVoted = false;
+        int option = -1;
+
+        LoopVotesArray(j)
+        {
+            int iVotes[eVotes];
+            g_aVotes.GetArray(j, iVotes[0]);
+
+            if (StrEqual(sCommunity, iVotes[eCommunity], false))
+            {
+                if (iVotes[ePollID] == iPolls[eID])
+                {
+                    bVoted = true;
+                    option = iVotes[eOptionID];
+                }
+            }
+        }
+
+        char sTitle[64];
+
+        if (bVoted)
+        {
+            if (g_cDebug.BoolValue)
+            {
+                Format(sTitle, sizeof(sTitle), "[VOTED.%d] ", option);
+            }
+            else
+            {
+                Format(sTitle, sizeof(sTitle), "[VOTED] ");
+            }
+        }
+
+        Format(sTitle, sizeof(sTitle), "%s%s", sTitle, iPolls[eTitle]);
+        
+        if (g_cDebug.BoolValue)
+        {
+            Format(sTitle, sizeof(sTitle), "[%d] %s", iPolls[eID], sTitle);
+        }
+
+        if (!bVoted || (bVoted && g_cAllowRevote.BoolValue))
+        {
+            menu.AddItem(sBuffer, sTitle);
+        }
+        else 
+        {
+            menu.AddItem(sBuffer, sTitle, ITEMDRAW_DISABLED);
+        }
     }
 
     menu.ExitButton = true;
@@ -219,8 +267,13 @@ void ListPollOptions(int client, int poll)
             Format(sParam, sizeof(sParam), "%d.%d", poll, iOptions[eID]);
 
             char sOption[64];
-            // Format(sOption, sizeof(sOption), "[%d] %s", iOptions[eID], iOptions[eOption]);
+            
             Format(sOption, sizeof(sOption), "%s", iOptions[eOption]);
+
+            if (g_cDebug.BoolValue)
+            {
+                Format(sOption, sizeof(sOption), "[%d] %s", iOptions[eID], sOption);
+            }
 
             menu.AddItem(sParam, sOption);
         }
@@ -294,18 +347,20 @@ void PlayerVote(int client, int poll, int option)
 
     char sInsertUpdate[768];
 
+    int iTime = GetTime();
+
     // TODO
     if (g_cAllowRevote.BoolValue)
     {
         g_dDatabase.Format(sInsertUpdate, sizeof(sInsertUpdate),
-        "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES (UNIX_TIMESTAMP(), %d, %d, \"%s\", \"%N\") \
-        ON DUPLICATE KEY UPDATE time = UNIX_TIMESTAMP(), option = %d, name = \"%N\";", poll, option, sCommunity, client, option, client);
+        "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES (%d, %d, %d, \"%s\", \"%N\") \
+        ON DUPLICATE KEY UPDATE time = %d, option = %d, name = \"%N\";", iTime, poll, option, sCommunity, client, iTime, option, client);
     }
     else
     {
         g_dDatabase.Format(sInsertUpdate, sizeof(sInsertUpdate),
-        "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES (UNIX_TIMESTAMP(), %d, %d, \"%s\", \"%N\");",
-        poll, option, sCommunity, client);
+        "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES (%d, %d, %d, \"%s\", \"%N\");",
+        iTime, poll, option, sCommunity, client);
     }
 
     if (g_cDebug.BoolValue)
@@ -318,6 +373,7 @@ void PlayerVote(int client, int poll, int option)
     dp.WriteCell(GetClientUserId(client));
     dp.WriteCell(poll);
     dp.WriteCell(option);
+    dp.WriteCell(iTime);
     g_dDatabase.Query(sqlPlayerVote, sInsertUpdate, dp);
 }
 

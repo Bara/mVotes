@@ -46,12 +46,12 @@ public void OnPluginStart()
     AutoExecConfig_SetFile("plugin.mvotes");
     g_cDebug = AutoExecConfig_CreateConVar("mvotes_debug_mode", "1", "Enable or disable debug debug mode", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cPrintToBara = AutoExecConfig_CreateConVar("mvotes_debug_print_to_bara", "1", "Enable or disable logging in baras console :o", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-    g_cAddTests = AutoExecConfig_CreateConVar("mvotes_debug_add_tests", "1", "Add 3 new test votes on start up?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+    g_cAddTests = AutoExecConfig_CreateConVar("mvotes_debug_add_tests", "0", "Add 3 new test votes on start up?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cEntry = AutoExecConfig_CreateConVar("mvotes_database_entry", "mvotes", "Name for the database entry in your databases.cfg");
     g_cMinOptions = AutoExecConfig_CreateConVar("mvotes_min_options", "2", "Required options for a vote", FCVAR_NOTIFY, true, 2.0);
     g_cMinLength = AutoExecConfig_CreateConVar("mvotes_min_length", "1", "(Time in minutes) Is a length less than this value -> Vote start failed", FCVAR_NOTIFY, true, 1.0);
     g_cMessageAll = AutoExecConfig_CreateConVar("mvotes_message_all", "0", "Print message to all players if a new poll was created? (0 - disable, 1 - enable)", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-    g_cAllowRevote = AutoExecConfig_CreateConVar("mvotes_allow_revote", "0", "Allow revoting? (0 - disable, 1 - enable", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+    g_cAllowRevote = AutoExecConfig_CreateConVar("mvotes_allow_revote", "1", "Allow revoting? (0 - disable, 1 - enable", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     AutoExecConfig_ExecuteFile();
     AutoExecConfig_CleanFile();
 
