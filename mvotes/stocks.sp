@@ -144,10 +144,22 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     return -1;
 }
 
-void ListVotes(int client)
+void ListPolls(int client)
 {
+    if (!g_bLoaded)
+    {
+        CReplyToCommand(client, "{darkred}[MVotes] {default}This function is currently not available.");
+        return;
+    }
+
+    if (g_cDeadPlayers.BoolValue && IsPlayerAlive(client))
+    {
+        CReplyToCommand(client, "{darkred}[MVotes] {default}This function is just for dead players.");
+        return;
+    }
+
     Menu menu = new Menu(Menu_PollList);
-    menu.SetTitle("Active polls:");
+    menu.SetTitle("Active polls:"); // TODO
 
     LoopPollsArray(i)
     {
@@ -177,13 +189,12 @@ void ListVotes(int client)
             int iVotes[eVotes];
             g_aVotes.GetArray(j, iVotes[0]);
 
-            if (StrEqual(sCommunity, iVotes[eCommunity], false))
+            if (StrEqual(sCommunity, iVotes[eCommunity], false) && iVotes[ePollID] == iPolls[eID])
             {
-                if (iVotes[ePollID] == iPolls[eID])
-                {
-                    bVoted = true;
-                    option = iVotes[eOptionID];
-                }
+                bVoted = true;
+                option = iVotes[eOptionID];
+
+                break;
             }
         }
 
@@ -240,6 +251,12 @@ public int Menu_PollList(Menu menu, MenuAction action, int client, int param)
 
 void ListPollOptions(int client, int poll)
 {
+    if (g_cDeadPlayers.BoolValue && IsPlayerAlive(client))
+    {
+        CReplyToCommand(client, "{darkred}[MVotes] {default}This function is just for dead players.");
+        return;
+    }
+
     Menu menu = new Menu(Menu_OptionList);
 
     LoopPollsArray(i)
@@ -266,16 +283,49 @@ void ListPollOptions(int client, int poll)
             char sParam[24];
             Format(sParam, sizeof(sParam), "%d.%d", poll, iOptions[eID]);
 
+            char sCommunity[18];
+            if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
+            {
+                return;
+            }
+
+            bool bVoted = false;
+
+            LoopVotesArray(j)
+            {
+                int iVotes[eVotes];
+                g_aVotes.GetArray(j, iVotes[0]);
+
+                if (StrEqual(sCommunity, iVotes[eCommunity], false) && iVotes[ePollID] == iOptions[ePoll] && iVotes[eOptionID] == iOptions[eID])
+                {
+                    bVoted = true;
+
+                    break;
+                }
+            }
+
             char sOption[64];
-            
-            Format(sOption, sizeof(sOption), "%s", iOptions[eOption]);
+
+            if (bVoted)
+            {
+                Format(sOption, sizeof(sOption), "[VOTED] ");
+            }
+
+            Format(sOption, sizeof(sOption), "%s%s", sOption, iOptions[eOption]);
 
             if (g_cDebug.BoolValue)
             {
                 Format(sOption, sizeof(sOption), "[%d] %s", iOptions[eID], sOption);
             }
 
-            menu.AddItem(sParam, sOption);
+            if (!bVoted)
+            {
+                menu.AddItem(sParam, sOption);
+            }
+            else
+            {
+                menu.AddItem(sParam, sOption, ITEMDRAW_DISABLED);
+            }
         }
     }
 
@@ -327,7 +377,7 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
     {
         if (param == MenuCancel_ExitBack)
         {
-            ListVotes(client);
+            ListPolls(client);
         }
     }
     else if (action == MenuAction_End)
@@ -338,6 +388,12 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
 
 void PlayerVote(int client, int poll, int option)
 {
+    if (g_cDeadPlayers.BoolValue && IsPlayerAlive(client))
+    {
+        CReplyToCommand(client, "{darkred}[MVotes] {default}This function is just for dead players.");
+        return;
+    }
+    
     char sCommunity[18];
 
     if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))

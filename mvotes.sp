@@ -13,6 +13,8 @@
 #define LoopOptionsArray(%1) for (int %1 = 0; %1 < g_aOptions.Length; %1++)
 #define LoopVotesArray(%1) for (int %1 = 0; %1 < g_aVotes.Length; %1++)
 
+#define MVOTES_ADMINFLAG ADMFLAG_GENERIC
+
 #include "mvotes/globals.sp"
 #include "mvotes/stocks.sp"
 #include "mvotes/sql.sp"
@@ -45,17 +47,18 @@ public void OnPluginStart()
     AutoExecConfig_SetCreateFile(true);
     AutoExecConfig_SetFile("plugin.mvotes");
     g_cDebug = AutoExecConfig_CreateConVar("mvotes_debug_mode", "1", "Enable or disable debug debug mode", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-    g_cPrintToBara = AutoExecConfig_CreateConVar("mvotes_debug_print_to_bara", "1", "Enable or disable logging in baras console :o", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+    g_cPrintToBara = AutoExecConfig_CreateConVar("mvotes_debug_print_to_bara", "1", "Enable or disable logging in baras console :o (require mvotes_debug_mode 1)", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cAddTests = AutoExecConfig_CreateConVar("mvotes_debug_add_tests", "0", "Add 3 new test votes on start up?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cEntry = AutoExecConfig_CreateConVar("mvotes_database_entry", "mvotes", "Name for the database entry in your databases.cfg");
     g_cMinOptions = AutoExecConfig_CreateConVar("mvotes_min_options", "2", "Required options for a vote", FCVAR_NOTIFY, true, 2.0);
     g_cMinLength = AutoExecConfig_CreateConVar("mvotes_min_length", "1", "(Time in minutes) Is a length less than this value -> Vote start failed", FCVAR_NOTIFY, true, 1.0);
-    g_cMessageAll = AutoExecConfig_CreateConVar("mvotes_message_all", "0", "Print message to all players if a new poll was created? (0 - disable, 1 - enable)", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+    g_cMessageAll = AutoExecConfig_CreateConVar("mvotes_message_all", "1", "Print message to all players if a new poll was created? (0 - disable, 1 - enable)", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cAllowRevote = AutoExecConfig_CreateConVar("mvotes_allow_revote", "1", "Allow revoting? (0 - disable, 1 - enable", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+    g_cDeadPlayers = AutoExecConfig_CreateConVar("mvotes_only_dead_players", "0", "Allow voting just for dead players?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     AutoExecConfig_ExecuteFile();
     AutoExecConfig_CleanFile();
 
-    RegAdminCmd("sm_votes", Command_Votes, ADMFLAG_ROOT);
+    RegAdminCmd("sm_votes", Command_Votes, MVOTES_ADMINFLAG);
 
     HookEvent("player_death", Event_PlayerDeathPost, EventHookMode_Post);
 }
@@ -101,12 +104,7 @@ public Action Command_Votes(int client, int args)
         return Plugin_Handled;
     }
 
-    if (!g_bLoaded)
-    {
-        CReplyToCommand(client, "{darkred}[MVotes] {default}This function is currently not available.");
-    }
-
-    ListVotes(client);
+    ListPolls(client);
 
     return Plugin_Continue;
 }
@@ -120,10 +118,12 @@ public Action Event_PlayerDeathPost(Event event, const char[] name, bool dontBro
         return;
     }
 
-    if (!CheckCommandAccess(client, "sm_admin", ADMFLAG_ROOT))
+    if (!CheckCommandAccess(client, "sm_admin", MVOTES_ADMINFLAG))
     {
         return;
     }
 
-    CPrintToChat(client, "{darkred}[MVotes] {default}We've currently {darkblue}%d {default}active votes. Type {darkblue}!votes {default}to view all availables polls.", GetActivePolls());
+    int iActive = GetActivePolls();
+
+    CPrintToChat(client, "{darkred}[MVotes] {default}We've currently {darkblue}%d {default}active votes. Type {darkblue}!votes {default}to view all availables polls.", iActive);
 }

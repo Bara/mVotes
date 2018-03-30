@@ -464,6 +464,8 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
         Format(iVotes[eCommunity], sizeof(sCommunity), sCommunity);
 
         g_aVotes.PushArray(iVotes[0]);
+
+        ListPolls(client);
     }
 }
 
