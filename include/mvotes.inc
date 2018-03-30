@@ -27,5 +27,6 @@ public SharedPlugin __pl_mvotes =
 public __pl_mvotes_SetNTVOptional()
 {
     MarkNativeAsOptional("MVotes_CreatePoll");
+    MarkNativeAsOptional("MVotes_ClosePoll");
 }
 #endif
