@@ -1,3 +1,5 @@
+static g_iAntiSpam = -1;
+
 void _sqlConnect()
 {
     char sEntry[32];
@@ -230,6 +232,23 @@ public void sqlClosePoll(Database db, DBResultSet results, const char[] error, i
     }
     else
     {
+        if (g_cDebug.BoolValue)
+        {
+            LogMessage("[MVotes.sqlClosePoll] Clear client stuff...");
+            PrintToBaraConsole("[MVotes.sqlClosePoll] Clear client stuff...");
+        }
+
+        LoopValidClients(i)
+        {
+            RemoveClientVotes(i, poll);
+        }
+
+        if (g_cDebug.BoolValue)
+        {
+            LogMessage("[MVotes.sqlClosePoll] Clear polls array...");
+            PrintToBaraConsole("[MVotes.sqlClosePoll] Clear polls array...");
+        }
+
         LoopPollsArray(i)
         {
             int iPolls[ePolls];
@@ -242,6 +261,12 @@ public void sqlClosePoll(Database db, DBResultSet results, const char[] error, i
             }
         }
 
+        if (g_cDebug.BoolValue)
+        {
+            LogMessage("[MVotes.sqlClosePoll] Clear options array...");
+            PrintToBaraConsole("[MVotes.sqlClosePoll] Clear options array...");
+        }
+
         LoopOptionsArray(i)
         {
             int iOptions[eOption];
@@ -251,11 +276,6 @@ public void sqlClosePoll(Database db, DBResultSet results, const char[] error, i
             {
                 g_aOptions.Erase(i);
             }
-        }
-
-        LoopValidClients(i)
-        {
-            RemoveClientVotes(i, poll);
         }
     }
 }
@@ -304,7 +324,7 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
             PrintToBaraConsole("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExpire], iPolls[eTitle]);
         }
 
-        LoopOptionsArray(i)
+        LoopCustomArray(i, aOptions)
         {
             char sOption[32];
             aOptions.GetString(i, sOption, sizeof(sOption));
@@ -373,9 +393,10 @@ public void sqlInsertOptions(Database db, DBResultSet results, const char[] erro
             PrintToBaraConsole("[MVotes.sqlLoadOptions.Cache] iOptionID: %d, iPoll: %d, sOption: %s", iOption[eID], iOption[ePoll], iOption[eOption]);
         }
 
-        if (g_cMessageAll.BoolValue)
+        if (g_cMessageAll.BoolValue && (g_iAntiSpam == -1 || (g_iAntiSpam + 5 < GetTime())))
         {
-            CPrintToChatAll("{darkred}[MVotes] {default}The poll {darkblue}\"%s\" {default}is now available!", sTitle);
+            g_iAntiSpam = GetTime();
+            CPrintToChatAll("{darkred}[MVotes] {default}The poll {darkblue}%s {default}is now available!", sTitle);
         }
     }
 }

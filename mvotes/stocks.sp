@@ -172,6 +172,23 @@ void ListPolls(int client)
             continue;
         }
 
+        /* int iCount = 0;
+        LoopOptionsArray(j)
+        {
+            int iOptions[eOption];
+            g_aOptions.GetArray(j, iOptions[0]);
+
+            if (iPolls[eID] == iOptions[ePoll])
+            {
+                iCount++;
+            }
+        }
+
+        if (iCount < g_cMinOptions.IntValue)
+        {
+            continue;
+        } */
+
         char sBuffer[12];
         IntToString(iPolls[eID], sBuffer, sizeof(sBuffer));
 
@@ -476,16 +493,9 @@ void RemoveClientVotes(int client, int poll = -1)
 
         if (StrEqual(sCommunity, iVotes[eCommunity], false))
         {
-            if (poll == -1)
+            if (poll == -1 || iVotes[ePollID] == poll)
             {
                 g_aVotes.Erase(i);
-            }
-            else
-            {
-                if (iVotes[ePollID] == poll)
-                {
-                    g_aVotes.Erase(i);
-                }
             }
         }
     }

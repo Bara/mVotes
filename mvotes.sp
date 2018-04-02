@@ -12,6 +12,7 @@
 #define LoopPollsArray(%1) for (int %1 = 0; %1 < g_aPolls.Length; %1++)
 #define LoopOptionsArray(%1) for (int %1 = 0; %1 < g_aOptions.Length; %1++)
 #define LoopVotesArray(%1) for (int %1 = 0; %1 < g_aVotes.Length; %1++)
+#define LoopCustomArray(%1,%2) for (int %1 = 0; %1 < %2.Length; %1++)
 
 #define MVOTES_ADMINFLAG ADMFLAG_GENERIC
 
@@ -19,6 +20,7 @@
 #include "mvotes/stocks.sp"
 #include "mvotes/sql.sp"
 #include "mvotes/natives.sp"
+#include "mvotes/create.sp"
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
@@ -37,7 +39,7 @@ public Plugin myinfo =
     name = "mVotes",
     author = "Bara",
     description = "Voting plugin based on mysql",
-    version = "1.0.0-alpha",
+    version = "1.0.0-beta",
     url = "github.com/Bara"
 };
 
@@ -59,8 +61,11 @@ public void OnPluginStart()
     AutoExecConfig_CleanFile();
 
     RegAdminCmd("sm_votes", Command_Votes, MVOTES_ADMINFLAG);
+    RegAdminCmd("sm_createvote", Command_CreateVote, ADMFLAG_ROOT);
 
     HookEvent("player_death", Event_PlayerDeathPost, EventHookMode_Post);
+
+    LoadTranslations("core.phrases");
 }
 
 public void OnConfigsExecuted()
@@ -95,6 +100,7 @@ public void OnClientPostAdminCheck(int client)
 public void OnClientDisconnect(int client)
 {
     RemoveClientVotes(client);
+    ResetCreateVote(client);
 }
 
 public Action Command_Votes(int client, int args)

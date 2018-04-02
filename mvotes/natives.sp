@@ -7,7 +7,7 @@ public int Native_CreatePoll(Handle plugin, int numParams)
     
     int iLength = GetNativeCell(3);
 
-    ArrayList aOptions = GetNativeCell(4);
+    ArrayList aOptions = view_as<ArrayList>(CloneHandle(GetNativeCell(4)));
 
     return CreatePoll(client, sTitle, iLength, aOptions);
 }
