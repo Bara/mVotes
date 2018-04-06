@@ -350,6 +350,8 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
             dp2.WriteString(sTitle);
             dp2.WriteString(sOption);
         }
+
+        delete aOptions;
     }
 }
 
@@ -396,7 +398,7 @@ public void sqlInsertOptions(Database db, DBResultSet results, const char[] erro
         if (g_cMessageAll.BoolValue && (g_iAntiSpam == -1 || (g_iAntiSpam + 5 < GetTime())))
         {
             g_iAntiSpam = GetTime();
-            CPrintToChatAll("{darkred}[MVotes] {default}The poll {darkblue}%s {default}is now available!", sTitle);
+            CPrintToChatAll("%T", "Chat - Poll Available", LANG_SERVER, sTitle);
         }
     }
 }
@@ -461,7 +463,7 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
             }
         }
 
-        CPrintToChat(client, "{darkred}[MVotes] {default}You voted for {darkblue}%s {default}with {darkblue}%s{default}.", sTitle, sOption);
+        CPrintToChat(client, "%T", "Chat - Voted For", client, sTitle, sOption);
 
         LoopVotesArray(i)
         {

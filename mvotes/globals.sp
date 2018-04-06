@@ -2,13 +2,13 @@ Database g_dDatabase = null;
 
 ConVar g_cDebug = null;
 ConVar g_cPrintToBara = null;
-ConVar g_cAddTests = null;
 ConVar g_cEntry = null;
 ConVar g_cMinOptions = null;
 ConVar g_cMinLength = null;
 ConVar g_cMessageAll = null;
 ConVar g_cAllowRevote = null;
 ConVar g_cDeadPlayers = null;
+ConVar g_cPluginTag = null;
 
 int g_iCreateTables = -1;
 

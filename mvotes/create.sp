@@ -14,21 +14,9 @@ public Action Command_CreateVote(int client, int args)
         return Plugin_Handled;
     }
 
-    if (g_cDebug.BoolValue)
-    {
-        LogMessage("[MVotes.Command_CreateVote] g_aCOptions1: %d", g_aCOptions[client]);
-        PrintToBaraConsole("[MVotes.Command_CreateVote] g_aCOptions1: %d", g_aCOptions[client]);
-    }
-
     if (g_aCOptions[client] == null)
     {
         g_aCOptions[client] = new ArrayList(24);
-    }
-
-    if (g_cDebug.BoolValue)
-    {
-        LogMessage("[MVotes.Command_CreateVote] g_aCOptions2: %d", g_aCOptions[client]);
-        PrintToBaraConsole("[MVotes.Command_CreateVote] g_aCOptions2: %d", g_aCOptions[client]);
     }
 
     ShowCreateMenu(client);
@@ -49,41 +37,50 @@ void ShowCreateMenu(int client)
         PrintToBaraConsole("[MVotes.ShowCreateMenu] called");
     }
 
-    char sBuffer[24];
+    char sBuffer[32];
+
+    Format(sBuffer, sizeof(sBuffer), "%T\n ", "Menu - Create Vote", client);
 
     Menu menu = new Menu(Menu_CreateMenu);
-    menu.SetTitle("Create vote\n ");
+    menu.SetTitle(sBuffer);
 
     if (strlen(g_sTitle[client]) > 3)
     {
-        menu.AddItem("title", "[X] Set title");
+        Format(sBuffer, sizeof(sBuffer), "[X] %T", "Menu - Set title", client);
+        menu.AddItem("title", sBuffer);
     }
     else
     {
-        menu.AddItem("title", "[ ] Set title");
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T", "Menu - Set title", client);
+        menu.AddItem("title", sBuffer);
     }
 
     if (g_iLength[client] >= g_cMinLength.IntValue)
     {
-        menu.AddItem("length", "[X] Set length");
+        Format(sBuffer, sizeof(sBuffer), "[X] %T", "Menu - Set length", client);
+        menu.AddItem("length", sBuffer);
     }
     else
     {
-        menu.AddItem("length", "[ ] Set length");
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T", "Menu - Set length", client);
+        menu.AddItem("length", sBuffer);
     }
 
     if (g_aCOptions[client].Length >= g_cMinOptions.IntValue)
     {
-        menu.AddItem("options", "[X] Set options\n ");
+        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Set options", client);
+        menu.AddItem("options", sBuffer);
     }
     else
     {
-        menu.AddItem("options", "[ ] Set options\n ");
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T\n ", "Menu - Set options", client);
+        menu.AddItem("options", sBuffer);
     }
 
     if (strlen(g_sTitle[client]) > 3 && g_iLength[client] >= g_cMinLength.IntValue && g_aCOptions[client].Length >= g_cMinOptions.IntValue)
     {
-        menu.AddItem("create", "> Create Vote\n");
+        Format(sBuffer, sizeof(sBuffer), "> %T\n ", "Menu - Create Vote", client);
+        menu.AddItem("create", sBuffer);
     }
     
     Format(sBuffer, sizeof(sBuffer), "%T", "Exit", client);
@@ -110,20 +107,17 @@ public int Menu_CreateMenu(Menu menu, MenuAction action, int client, int param)
         if (StrEqual(sParam, "title", false))
         {
             g_bTitle[client] = true;
-
-            CPrintToChat(client, "{darkred}[MVotes] {default}Type your title in chat or abort with '!abort'.");
+            CPrintToChat(client, "%T", "Chat - Type title", client);
         }
         else if (StrEqual(sParam, "length", false))
         {
             g_bLength[client] = true;
-
-            CPrintToChat(client, "{darkred}[MVotes] {default}Type your length in chat or abort with '!abort'.");
+            CPrintToChat(client, "%T", "Chat - Type length", client);
         }
         else if (StrEqual(sParam, "options", false))
         {
             g_bOptions[client] = true;
-
-            CPrintToChat(client, "{darkred}[MVotes] {default}Type your options in chat or abort with '!abort'.");
+            CPrintToChat(client, "%T", "Chat - Type options", client);
         }
         else if (StrEqual(sParam, "create", false))
         {
@@ -164,8 +158,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
         if (g_bTitle[client])
         {
             strcopy(g_sTitle[client], sizeof(g_sTitle[]), message);
-
-            PrintToChat(client, "Title: %s", message);
+            CPrintToChat(client, "%T", "Chat - Title", client, g_sTitle[client]);
         }
         else if (g_bLength[client])
         {
@@ -176,16 +169,16 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
                 if (iLength >= g_cMinLength.IntValue)
                 {
                     g_iLength[client] = iLength;
-                    PrintToChat(client, "Length: %d", iLength);
+                    CPrintToChat(client, "%T", "Chat - Length", client, g_iLength[client]);
                 }
                 else
                 {
-                    CPrintToChat(client, "{darkred}[MVotes] {default} Invalid length!");
+                    CPrintToChat(client, "%T", "Chat - Invalid length", client);
                 }
             }
             else
             {
-                CPrintToChat(client, "{darkred}[MVotes] {default}Length isn't numeric!");
+                CPrintToChat(client, "%T", "Chat - Not numeric length", client);
             }
         }
         else if (g_bOptions[client])
@@ -202,6 +195,8 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
                         continue;
                     }
 
+                    CPrintToChat(client, "%T", "Chat - Option", client, sOptions[i]);
+
                     g_aCOptions[client].PushString(sOptions[i]);
 
                     if (g_cDebug.BoolValue)
@@ -213,7 +208,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
             }
             else
             {
-                CPrintToChat(client, "{darkred}[MVotes] {default}We need more options!");
+                CPrintToChat(client, "%T", "Chat - More Options", client);
             }
         }
 
@@ -236,12 +231,6 @@ bool CheckClientStatus(int client)
 
 void ResetCreateVote(int client, bool message = false)
 {
-    if (g_cDebug.BoolValue)
-    {
-        LogMessage("[MVotes.ResetCreateVote] 1");
-        PrintToBaraConsole("[MVotes.ResetCreateVote] 1");
-    }
-
     g_bTitle[client] = false;
     g_bLength[client] = false;
     g_bOptions[client] = false;
@@ -249,18 +238,12 @@ void ResetCreateVote(int client, bool message = false)
     Format(g_sTitle[client], sizeof(g_sTitle[]), "");
     g_iLength[client] = -1;
 
-    if (g_cDebug.BoolValue)
-    {
-        LogMessage("[MVotes.ResetCreateVote] 2");
-        PrintToBaraConsole("[MVotes.ResetCreateVote] 2");
-    }
-
     delete g_aCOptions[client];
 
     if (g_cDebug.BoolValue)
     {
-        LogMessage("[MVotes.ResetCreateVote] g_aCOptions: %d", g_aCOptions[client]);
-        PrintToBaraConsole("[MVotes.ResetCreateVote] g_aCOptions: %d", g_aCOptions[client]);
+        LogMessage("[MVotes.ResetCreateVote] called");
+        PrintToBaraConsole("[MVotes.ResetCreateVote] called");
     }
 
     if (message && IsClientValid(client))
@@ -271,7 +254,7 @@ void ResetCreateVote(int client, bool message = false)
             PrintToBaraConsole("[MVotes.ResetCreateVote] 3");
         }
 
-        CPrintToChat(client, "{darkred}[MVotes] {default}Create vote settings resettet!");
+        CPrintToChat(client, "%T", "Settings reset", client);
     }
 }
 

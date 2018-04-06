@@ -148,18 +148,23 @@ void ListPolls(int client)
 {
     if (!g_bLoaded)
     {
-        CReplyToCommand(client, "{darkred}[MVotes] {default}This function is currently not available.");
+        CReplyToCommand(client, "%T", "Chat - Function Disabled", client);
         return;
     }
 
     if (g_cDeadPlayers.BoolValue && IsPlayerAlive(client))
     {
-        CReplyToCommand(client, "{darkred}[MVotes] {default}This function is just for dead players.");
+        CReplyToCommand(client, "%T", "Chat - Dead Players", client);
         return;
     }
 
+    char sBuffer[24];
+    Format(sBuffer, sizeof(sBuffer), "%T", "Menu - Current polls", client);
+
     Menu menu = new Menu(Menu_PollList);
-    menu.SetTitle("Active polls:"); // TODO
+    menu.SetTitle(sBuffer);
+
+    Format(sBuffer, sizeof(sBuffer), "%T", "Menu - Voted", client);
 
     LoopPollsArray(i)
     {
@@ -189,8 +194,8 @@ void ListPolls(int client)
             continue;
         } */
 
-        char sBuffer[12];
-        IntToString(iPolls[eID], sBuffer, sizeof(sBuffer));
+        char sPollID[12];
+        IntToString(iPolls[eID], sPollID, sizeof(sPollID));
 
         char sCommunity[18];
         if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
@@ -221,11 +226,11 @@ void ListPolls(int client)
         {
             if (g_cDebug.BoolValue)
             {
-                Format(sTitle, sizeof(sTitle), "[VOTED.%d] ", option);
+                Format(sTitle, sizeof(sTitle), "[%s.%d] ", sBuffer, option);
             }
             else
             {
-                Format(sTitle, sizeof(sTitle), "[VOTED] ");
+                Format(sTitle, sizeof(sTitle), "[%s] ", sBuffer);
             }
         }
 
@@ -238,11 +243,11 @@ void ListPolls(int client)
 
         if (!bVoted || (bVoted && g_cAllowRevote.BoolValue))
         {
-            menu.AddItem(sBuffer, sTitle);
+            menu.AddItem(sPollID, sTitle);
         }
         else 
         {
-            menu.AddItem(sBuffer, sTitle, ITEMDRAW_DISABLED);
+            menu.AddItem(sPollID, sTitle, ITEMDRAW_DISABLED);
         }
     }
 
@@ -270,7 +275,7 @@ void ListPollOptions(int client, int poll)
 {
     if (g_cDeadPlayers.BoolValue && IsPlayerAlive(client))
     {
-        CReplyToCommand(client, "{darkred}[MVotes] {default}This function is just for dead players.");
+        CReplyToCommand(client, "%T", "Chat - Dead Players", client);
         return;
     }
 
@@ -321,11 +326,12 @@ void ListPollOptions(int client, int poll)
                 }
             }
 
-            char sOption[64];
+            char sOption[64], sVoted[24];
+            Format(sVoted, sizeof(sVoted), "%T", "Menu - Voted", client);
 
             if (bVoted)
             {
-                Format(sOption, sizeof(sOption), "[VOTED] ");
+                Format(sOption, sizeof(sOption), "[%s] ", sVoted);
             }
 
             Format(sOption, sizeof(sOption), "%s%s", sOption, iOptions[eOption]);
@@ -375,7 +381,7 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
 
                 if (iPoll == iPolls[eID])
                 {
-                    CPrintToChat(client, "{darkred}[MVotes] {default}The poll \"%s\" is no longer available.", iPolls[eTitle]);
+                    CPrintToChat(client, "%T", "Chat - No longer available", client, iPolls[eTitle]);
                 }
                 
                 return;
@@ -407,7 +413,7 @@ void PlayerVote(int client, int poll, int option)
 {
     if (g_cDeadPlayers.BoolValue && IsPlayerAlive(client))
     {
-        CReplyToCommand(client, "{darkred}[MVotes] {default}This function is just for dead players.");
+        CReplyToCommand(client, "%T", "Chat - Dead Players", client);
         return;
     }
     
@@ -422,19 +428,9 @@ void PlayerVote(int client, int poll, int option)
 
     int iTime = GetTime();
 
-    // TODO
-    if (g_cAllowRevote.BoolValue)
-    {
-        g_dDatabase.Format(sInsertUpdate, sizeof(sInsertUpdate),
-        "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES (%d, %d, %d, \"%s\", \"%N\") \
-        ON DUPLICATE KEY UPDATE time = %d, option = %d, name = \"%N\";", iTime, poll, option, sCommunity, client, iTime, option, client);
-    }
-    else
-    {
-        g_dDatabase.Format(sInsertUpdate, sizeof(sInsertUpdate),
-        "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES (%d, %d, %d, \"%s\", \"%N\");",
-        iTime, poll, option, sCommunity, client);
-    }
+    g_dDatabase.Format(sInsertUpdate, sizeof(sInsertUpdate),
+    "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES (%d, %d, %d, \"%s\", \"%N\") \
+    ON DUPLICATE KEY UPDATE time = %d, option = %d, name = \"%N\";", iTime, poll, option, sCommunity, client, iTime, option, client);
 
     if (g_cDebug.BoolValue)
     {

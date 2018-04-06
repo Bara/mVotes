@@ -50,45 +50,41 @@ public void OnPluginStart()
     AutoExecConfig_SetFile("plugin.mvotes");
     g_cDebug = AutoExecConfig_CreateConVar("mvotes_debug_mode", "1", "Enable or disable debug debug mode", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cPrintToBara = AutoExecConfig_CreateConVar("mvotes_debug_print_to_bara", "1", "Enable or disable logging in baras console :o (require mvotes_debug_mode 1)", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-    g_cAddTests = AutoExecConfig_CreateConVar("mvotes_debug_add_tests", "0", "Add 3 new test votes on start up?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cEntry = AutoExecConfig_CreateConVar("mvotes_database_entry", "mvotes", "Name for the database entry in your databases.cfg");
     g_cMinOptions = AutoExecConfig_CreateConVar("mvotes_min_options", "2", "Required options for a vote", FCVAR_NOTIFY, true, 2.0);
     g_cMinLength = AutoExecConfig_CreateConVar("mvotes_min_length", "1", "(Time in minutes) Is a length less than this value -> Vote start failed", FCVAR_NOTIFY, true, 1.0);
     g_cMessageAll = AutoExecConfig_CreateConVar("mvotes_message_all", "1", "Print message to all players if a new poll was created? (0 - disable, 1 - enable)", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cAllowRevote = AutoExecConfig_CreateConVar("mvotes_allow_revote", "1", "Allow revoting? (0 - disable, 1 - enable", FCVAR_NOTIFY, true, 0.0, true, 1.0);
     g_cDeadPlayers = AutoExecConfig_CreateConVar("mvotes_only_dead_players", "0", "Allow voting just for dead players?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+    g_cPluginTag = AutoExecConfig_CreateConVar("mvotes_plugin_tag", "{darkred}[MVotes] {default}", "Set plugin tag for all chat messages");
     AutoExecConfig_ExecuteFile();
     AutoExecConfig_CleanFile();
 
-    RegAdminCmd("sm_votes", Command_Votes, MVOTES_ADMINFLAG);
+    g_cPluginTag.AddChangeHook(CVar_ChangeHook);
+
+    RegConsoleCmd("sm_votes", Command_Votes);
     RegAdminCmd("sm_createvote", Command_CreateVote, ADMFLAG_ROOT);
 
     HookEvent("player_death", Event_PlayerDeathPost, EventHookMode_Post);
 
     LoadTranslations("core.phrases");
+    LoadTranslations("mvotes.phrases");
 }
 
 public void OnConfigsExecuted()
 {
-    initSQL();
+    char sBuffer[64];
+    g_cPluginTag.GetString(sBuffer, sizeof(sBuffer));
+    CSetPrefix(sBuffer);
 
-    if (g_cDebug.BoolValue && g_cAddTests.BoolValue)
-    {
-        CreateTimer(3.0, Timer_AddTestPoll);
-    }
+    initSQL();
 }
 
-public Action Timer_AddTestPoll(Handle timer)
+public void CVar_ChangeHook(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-    char sBuffer[64];
-
-    for (int i = 0; i < 3; i++)
+    if (convar == g_cPluginTag)
     {
-        ArrayList aTest = new ArrayList(24);
-        aTest.PushString("Yes");
-        aTest.PushString("No");
-        Format(sBuffer, sizeof(sBuffer), "Test Vote %d", GetRandomInt(100, 999));
-        MVotes_CreatePoll(-1, sBuffer, GetRandomInt(43800, 262800), aTest);
+        CSetPrefix(newValue);
     }
 }
 
@@ -124,12 +120,7 @@ public Action Event_PlayerDeathPost(Event event, const char[] name, bool dontBro
         return;
     }
 
-    if (!CheckCommandAccess(client, "sm_admin", MVOTES_ADMINFLAG))
-    {
-        return;
-    }
-
     int iActive = GetActivePolls();
 
-    CPrintToChat(client, "{darkred}[MVotes] {default}We've currently {darkblue}%d {default}active votes. Type {darkblue}!votes {default}to view all availables polls.", iActive);
+    CPrintToChat(client, "%T", "Chat Advert - Player Death", client, iActive);
 }
