@@ -1,4 +1,5 @@
 static int g_iAntiSpam = -1;
+static char g_sCharset[12] = "utf8mb4";
 
 void _sqlConnect()
 {
@@ -29,7 +30,11 @@ public void sqlConnect(Database db, const char[] error, any data)
         LogMessage("[MVotes.sqlConnect] Connection was successful!");
     }
 
-    g_dDatabase.SetCharset("utf8mb4");
+    if (!g_dDatabase.SetCharset("utf8mb4"))
+    {
+        g_dDatabase.SetCharset("utf8");
+        Format(g_sCharset, sizeof(g_sCharset), "utf8");
+    }
 
     CreateTables();
 }
@@ -38,8 +43,9 @@ void CreateTables()
 {
     g_iCreateTables = 0;
 
-    char sPolls[] = "CREATE TABLE IF NOT EXISTS `mvotes_polls` \
-        ( \
+    char sQuery[1024];
+
+    Format(sQuery, sizeof(sQuery), "CREATE TABLE IF NOT EXISTS `mvotes_polls` ( \
             `id` int(11) NOT NULL AUTO_INCREMENT, \
             `status` tinyint(1) NOT NULL, \
             `title` varchar(64) NOT NULL, \
@@ -50,22 +56,31 @@ void CreateTables()
             `port` int(6) NOT NULL, \
             PRIMARY KEY (`id`), \
             UNIQUE KEY (`title`, `created`) \
-        ) ENGINE=InnoDB CHARSET=utf8mb4;";
+        ) ENGINE=InnoDB CHARSET=\"%s\"", g_sCharset);
+
+    if (g_cDebug.BoolValue)
+    {
+        LogMessage("[MVotes.CreateTables] Polls Query: %s", sQuery);
+    }
     
-    g_dDatabase.Query(sqlCreateTables, sPolls, 1);
+    g_dDatabase.Query(sqlCreateTables, sQuery, 1);
     
-    char sOptions[] = "CREATE TABLE IF NOT EXISTS `mvotes_options` \
-        ( \
+    Format(sQuery, sizeof(sQuery), "CREATE TABLE IF NOT EXISTS `mvotes_options` ( \
             `id` int(11) NOT NULL AUTO_INCREMENT, \
             `poll` int(11) NOT NULL, \
             `option` varchar(32) NOT NULL, \
             PRIMARY KEY (`id`), \
             UNIQUE KEY (`poll`, `option`) \
-        ) ENGINE=InnoDB CHARSET=utf8mb4;";
-    g_dDatabase.Query(sqlCreateTables, sOptions, 2);
+        ) ENGINE=InnoDB CHARSET=\"%s\"", g_sCharset);
+
+    if (g_cDebug.BoolValue)
+    {
+        LogMessage("[MVotes.CreateTables] Options Query: %s", sQuery);
+    }
+
+    g_dDatabase.Query(sqlCreateTables, sQuery, 2);
     
-    char sVotes[] = "CREATE TABLE IF NOT EXISTS `mvotes_votes` \
-        ( \
+    Format(sQuery, sizeof(sQuery), "CREATE TABLE IF NOT EXISTS `mvotes_votes` ( \
             `id` int(11) NOT NULL AUTO_INCREMENT, \
             `time` int(11) NOT NULL, \
             `poll` int(11) NOT NULL, \
@@ -74,15 +89,14 @@ void CreateTables()
             `name` varchar(128) NOT NULL, \
             PRIMARY KEY (`id`), \
             UNIQUE KEY (`poll`, `communityid`) \
-        ) ENGINE=InnoDB CHARSET=utf8mb4;";
-    g_dDatabase.Query(sqlCreateTables, sVotes, 3);
+        ) ENGINE=InnoDB CHARSET=\"%s\"", g_sCharset);
 
     if (g_cDebug.BoolValue)
     {
-        LogMessage("[MVotes.CreateTables] Polls Query: %s", sPolls);
-        LogMessage("[MVotes.CreateTables] Options Query: %s", sOptions);
-        LogMessage("[MVotes.CreateTables] Votes Query: %s", sVotes);
+        LogMessage("[MVotes.CreateTables] Votes Query: %s", sQuery);
     }
+
+    g_dDatabase.Query(sqlCreateTables, sQuery, 3);
 }
 
 public void sqlCreateTables(Database db, DBResultSet results, const char[] error, any data)
@@ -159,9 +173,9 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
                         LogMessage("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[pID], iPolls[pStatus], iPolls[pCreated], iPolls[pExpire], iPolls[pTitle]);
                     }
 
-                    char sOptions[128];
-                    Format(sOptions, sizeof(sOptions), "SELECT id, poll, option FROM mvotes_options WHERE poll = %d ORDER BY id ASC;", iPoll);
-                    g_dDatabase.Query(sqlLoadOptions, sOptions);
+                    char sQuery[256];
+                    Format(sQuery, sizeof(sQuery), "SELECT `id`, `poll`, `option` FROM `mvotes_options` WHERE `poll` = '%d' ORDER BY `id` ASC;", iPoll);
+                    g_dDatabase.Query(sqlLoadOptions, sQuery);
                 }
             }
         }
@@ -319,16 +333,16 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
                 LogMessage("[MVotes.sqlInsertPoll] Poll: %d, Option: %s", iPoll, sOption);
             }
 
-            char sInsert[256];
-            Format(sInsert, sizeof(sInsert), "INSERT INTO `mvotes_options` (`poll`, `option`) VALUES (%d, \"%s\");", iPoll, sOption);
+            char sQuery[256];
+            Format(sQuery, sizeof(sQuery), "INSERT INTO `mvotes_options` (`poll`, `option`) VALUES ('%d', \"%s\");", iPoll, sOption);
 
             if (g_cDebug.BoolValue)
             {
-                LogMessage("[MVotes.sqlInsertPoll] Insert Query: %s", sInsert);
+                LogMessage("[MVotes.sqlInsertPoll] Insert Query: %s", sQuery);
             }
 
             DataPack dp2 = new DataPack();
-            g_dDatabase.Query(sqlInsertOptions, sInsert, dp2);
+            g_dDatabase.Query(sqlInsertOptions, sQuery, dp2);
             dp2.WriteCell(iPoll);
             dp2.WriteString(sTitle);
             dp2.WriteString(sOption);

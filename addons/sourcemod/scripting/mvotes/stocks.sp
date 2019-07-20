@@ -19,27 +19,28 @@ stock void LoadPolls()
     g_aPolls = new ArrayList(sizeof(g_iPolls));
     g_aVotes = new ArrayList(sizeof(g_iVotes));
 
-    char sPolls[] = "SELECT id, status, title, created, expire FROM mvotes_polls WHERE status = 1 ORDER BY id ASC;";
+    char sQuery[256];
+    g_dDatabase.Format(sQuery, sizeof(sQuery), "SELECT `id`, `status`, `title`, `created`, `expire` FROM `mvotes_polls` WHERE `status` = '1' ORDER BY `id` ASC");
 
     if (g_cDebug.BoolValue)
     {
-        LogMessage("[CreateTables.LoadPolls] Polls Query: %s", sPolls);
+        LogMessage("[CreateTables.LoadPolls] Polls Query: %s", sQuery);
     }
 
-    g_dDatabase.Query(sqlLoadPolls, sPolls);
+    g_dDatabase.Query(sqlLoadPolls, sQuery);
 }
 
 stock void ClosePoll(int poll)
 {
-    char sUpdate[128];
-    Format(sUpdate, sizeof(sUpdate), "UPDATE mvotes_polls SET status = 0 WHERE id = %d;", poll);
+    char sQuery[256];
+    Format(sQuery, sizeof(sQuery), "UPDATE `mvotes_polls` SET `status` = '0' WHERE id = '%d';", poll);
 
     if (g_cDebug.BoolValue)
     {
-        LogMessage("[MVotes.ClosePoll] Update Query: %s", sUpdate);
+        LogMessage("[MVotes.ClosePoll] Update Query: %s", sQuery);
     }
 
-    g_dDatabase.Query(sqlClosePoll, sUpdate, poll);
+    g_dDatabase.Query(sqlClosePoll, sQuery, poll);
 }
 
 stock bool IsClientValid(int client)
@@ -118,16 +119,16 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     _iIP[3] = iIP & 0x000000FF;
     Format(sIP, sizeof(sIP), "%d.%d.%d.%d", _iIP[0], _iIP[1], _iIP[2], _iIP[3]);
 
-    char sInsert[256];
-    Format(sInsert, sizeof(sInsert), "INSERT INTO `mvotes_polls` (`status`, `title`, `created`, `expire`, `admin`, `ip`, `port`) VALUES (1, \"%s\", %d, %d, \"%s\", \"%s\", %d);", title, g_iTime, g_iExpire, sAdmin, sIP, iPort);
+    char sQuery[1024];
+    Format(sQuery, sizeof(sQuery), "INSERT INTO `mvotes_polls` (`status`, `title`, `created`, `expire`, `admin`, `ip`, `port`) VALUES ('1', \"%s\", '%d', '%d', \"%s\", \"%s\", '%d');", title, g_iTime, g_iExpire, sAdmin, sIP, iPort);
 
     if (g_cDebug.BoolValue)
     {
-        LogMessage("[MVotes.CreatePoll] Insert Query: %s", sInsert);
+        LogMessage("[MVotes.CreatePoll] Insert Query: %s", sQuery);
     }
 
     DataPack dp = new DataPack();
-    g_dDatabase.Query(sqlInsertPoll, sInsert, dp);
+    g_dDatabase.Query(sqlInsertPoll, sQuery, dp);
     dp.WriteString(title);
     dp.WriteCell(g_iTime);
     dp.WriteCell(g_iExpire);
@@ -415,17 +416,17 @@ void PlayerVote(int client, int poll, int option)
         return;
     }
 
-    char sInsertUpdate[768];
+    char sQuery[1024];
 
     int iTime = GetTime();
 
-    g_dDatabase.Format(sInsertUpdate, sizeof(sInsertUpdate),
-    "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES (%d, %d, %d, \"%s\", \"%N\") \
-    ON DUPLICATE KEY UPDATE time = %d, option = %d, name = \"%N\";", iTime, poll, option, sCommunity, client, iTime, option, client);
+    g_dDatabase.Format(sQuery, sizeof(sQuery),
+    "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES ('%d', '%d', '%d', \"%s\", \"%N\") \
+    ON DUPLICATE KEY UPDATE `time` = '%d', `option` = '%d', `name` = \"%N\";", iTime, poll, option, sCommunity, client, iTime, option, client);
 
     if (g_cDebug.BoolValue)
     {
-        LogMessage("[MVotes.PlayerVote] InsertUpdate Query: %s", sInsertUpdate);
+        LogMessage("[MVotes.PlayerVote] InsertUpdate Query: %s", sQuery);
     }
 
     DataPack dp = new DataPack();
@@ -433,7 +434,7 @@ void PlayerVote(int client, int poll, int option)
     dp.WriteCell(poll);
     dp.WriteCell(option);
     dp.WriteCell(iTime);
-    g_dDatabase.Query(sqlPlayerVote, sInsertUpdate, dp);
+    g_dDatabase.Query(sqlPlayerVote, sQuery, dp);
 }
 
 void LoadClientVotes(int client)
@@ -450,16 +451,15 @@ void LoadClientVotes(int client)
         return;
     }
 
-    char sSelect[128];
-
-    g_dDatabase.Format(sSelect, sizeof(sSelect), "SELECT id, time, poll, option, communityid FROM mvotes_votes WHERE communityid = \"%s\";", sCommunity);
+    char sQuery[256];
+    g_dDatabase.Format(sQuery, sizeof(sQuery), "SELECT `id`, `time`, `poll`, `option`, `communityid` FROM `mvotes_votes` WHERE `communityid` = \"%s\"", sCommunity);
 
     if (g_cDebug.BoolValue)
     {
-        LogMessage("[MVotes.LoadClientVotes] Select Query: %s", sSelect);
+        LogMessage("[MVotes.LoadClientVotes] Select Query: %s", sQuery);
     }
 
-    g_dDatabase.Query(sqlLoadClientVotes, sSelect, GetClientUserId(client));
+    g_dDatabase.Query(sqlLoadClientVotes, sQuery, GetClientUserId(client));
 }
 
 void RemoveClientVotes(int client, int poll = -1)

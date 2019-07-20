@@ -51,14 +51,16 @@
 
     "Chat - Type length"
     {
-        "en"        "Type your length in chat or abort with '!abort'."
-        "de"        "Gib eine Länge im Chat ein oder breche mit '!abort' ab."
+        "#format"   "{1:d}"
+        "en"        "Type your length (in minutes, at least {1} minutes) in chat or abort with '!abort'."
+        "de"        "Gib eine Länge (in Minuten, mindestens {1} Minuten) im Chat ein oder breche mit '!abort' ab."
     }
 
     "Chat - Type options"
     {
-        "en"        "Type your options in chat or abort with '!abort'. Separate each option with ';'."
-        "de"        "Gib deine Optionen im Chat ein oder breche mit '!abort' ab. Teile jede Option mit ein ';'"
+        "#format"   "{1:d}"
+        "en"        "Type your options (at least {1}) in chat or abort with '!abort'. Separate each option with ';'."
+        "de"        "Gib deine Optionen (mindestens {1}) im Chat ein oder breche mit '!abort' ab. Teile jede Option mit ein ';'"
     }
 
     "Chat - Title"

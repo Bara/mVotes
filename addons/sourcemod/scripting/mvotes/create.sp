@@ -119,12 +119,12 @@ public int Menu_CreateMenu(Menu menu, MenuAction action, int client, int param)
         else if (StrEqual(sParam, "length", false))
         {
             g_bLength[client] = true;
-            CPrintToChat(client, "%T", "Chat - Type length", client);
+            CPrintToChat(client, "%T", "Chat - Type length", client, g_cMinLength.IntValue);
         }
         else if (StrEqual(sParam, "options", false))
         {
             g_bOptions[client] = true;
-            CPrintToChat(client, "%T", "Chat - Type options", client);
+            CPrintToChat(client, "%T", "Chat - Type options", client, g_cMinOptions.IntValue);
         }
         else if (StrEqual(sParam, "create", false))
         {
@@ -246,14 +246,14 @@ void ResetCreateVote(int client, bool message = false)
 
     delete g_aCOptions[client];
 
-    if (g_cDebug.BoolValue)
+    if (!IsFakeClient(client) && !IsClientSourceTV(client) && g_cDebug.BoolValue)
     {
         LogMessage("[MVotes.ResetCreateVote] called");
     }
 
     if (message && IsClientValid(client))
     {
-        if (g_cDebug.BoolValue)
+        if (!IsFakeClient(client) && !IsClientSourceTV(client) && g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.ResetCreateVote] 3");
         }
