@@ -14,6 +14,15 @@ public Action Command_CreateVote(int client, int args)
         return Plugin_Handled;
     }
 
+    char sFlags[24];
+    g_cAdminFlag.GetString(sFlags, sizeof(sFlags));
+    
+    int iFlags = ReadFlagString(sFlags);
+    if (!CheckCommandAccess(client, "mvotes_create", iFlags))
+    {
+        return Plugin_Handled;
+    }
+
     if (g_aCOptions[client] == null)
     {
         g_aCOptions[client] = new ArrayList(24);

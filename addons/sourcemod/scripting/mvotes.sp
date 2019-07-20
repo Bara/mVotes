@@ -14,8 +14,6 @@
 #define LoopVotesArray(%1) for (int %1 = 0; %1 < g_aVotes.Length; %1++)
 #define LoopCustomArray(%1,%2) for (int %1 = 0; %1 < %2.Length; %1++)
 
-#define MVOTES_ADMINFLAG ADMFLAG_GENERIC
-
 #include "mvotes/globals.sp"
 #include "mvotes/stocks.sp"
 #include "mvotes/sql.sp"
@@ -58,13 +56,14 @@ public void OnPluginStart()
     g_cDeadPlayers = AutoExecConfig_CreateConVar("mvotes_only_dead_players", "0", "Allow voting just for dead players?", _, true, 0.0, true, 1.0);
     g_cPluginTag = AutoExecConfig_CreateConVar("mvotes_plugin_tag", "{darkred}[MVotes] {default}", "Set plugin tag for all chat messages");
     g_cMessageInterval = AutoExecConfig_CreateConVar("mvotes_message_interval", "120", "Prints every X seconds an message to all players. (0 - Disabled)", _, true, 0.0);
+    g_cAdminFlag = AutoExecConfig_CreateConVar("mvotes_admin_flags", "b", "Admin flags to get access for creating votes");
     AutoExecConfig_ExecuteFile();
     AutoExecConfig_CleanFile();
 
     g_cPluginTag.AddChangeHook(CVar_ChangeHook);
 
     RegConsoleCmd("sm_votes", Command_Votes);
-    RegAdminCmd("sm_createvote", Command_CreateVote, ADMFLAG_ROOT);
+    RegConsoleCmd("sm_createvote", Command_CreateVote);
 
     HookEvent("player_death", Event_PlayerDeathPost, EventHookMode_Post);
 
