@@ -34,7 +34,7 @@
     "Menu - Current polls"
     {
         "en"        "Current polls"
-        "de"        "Aktuele Umfragen"
+        "de"        "Aktuelle Umfragen"
     }
 
     "Menu - Voted"
