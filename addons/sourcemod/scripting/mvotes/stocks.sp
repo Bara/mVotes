@@ -510,3 +510,53 @@ int GetActivePolls()
 
     return iVotes;
 }
+
+ArrayList GetActivePollsArray()
+{
+    ArrayList aPolls = new ArrayList();
+
+    LoopPollsArray(i)
+    {
+        int iPolls[ePolls];
+        g_aPolls.GetArray(i, iPolls[0]);
+
+        if (iPolls[pExpire] <= GetTime() || !iPolls[pStatus])
+        {
+            ClosePoll(iPolls[pID]);
+            continue;
+        }
+
+        if (iPolls[pStatus])
+        {
+            aPolls.Push(iPolls[pID]);
+        }
+    }
+
+    return aPolls;
+}
+
+int GetUnvotedVotes(int client, int active)
+{
+    char sCommunity[18];
+    if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
+    {
+        return -1;
+    }
+
+    ArrayList aPolls = GetActivePollsArray();
+
+    LoopVotesArray(j)
+    {
+        int iVotes[eVotes];
+        g_aVotes.GetArray(j, iVotes[0]);
+
+        if (StrEqual(sCommunity, iVotes[vCommunity], false) && aPolls.FindValue(iVotes[vPollID]) != -1)
+        {
+            active--;
+        }
+    }
+
+    delete aPolls;
+
+    return active;
+}

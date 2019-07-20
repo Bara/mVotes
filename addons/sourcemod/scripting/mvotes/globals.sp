@@ -10,6 +10,7 @@ ConVar g_cDeadPlayers = null;
 ConVar g_cPluginTag = null;
 ConVar g_cMessageOnDeath = null;
 ConVar g_cMessageInterval = null;
+ConVar g_cMessageType = null;
 ConVar g_cAdminFlag = null;
 
 int g_iCreateTables = -1;

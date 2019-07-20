@@ -56,6 +56,7 @@ public void OnPluginStart()
     g_cDeadPlayers = AutoExecConfig_CreateConVar("mvotes_only_dead_players", "0", "Allow voting just for dead players?", _, true, 0.0, true, 1.0);
     g_cPluginTag = AutoExecConfig_CreateConVar("mvotes_plugin_tag", "{darkred}[MVotes] {default}", "Set plugin tag for all chat messages");
     g_cMessageInterval = AutoExecConfig_CreateConVar("mvotes_message_interval", "120", "Prints every X seconds an message to all players. (0 - Disabled)", _, true, 0.0);
+    g_cMessageType = AutoExecConfig_CreateConVar("mvotes_message_type", "1", "Which message? 0 - Print the amount of all active (unvoted + voted) votes, 1 - Print the amount of all active unvoted votes.", _, true, 0.0, true, 1.0);
     g_cAdminFlag = AutoExecConfig_CreateConVar("mvotes_admin_flags", "b", "Admin flags to get access for creating votes");
     AutoExecConfig_ExecuteFile();
     AutoExecConfig_CleanFile();
@@ -137,7 +138,19 @@ public Action Event_PlayerDeathPost(Event event, const char[] name, bool dontBro
         return;
     }
 
-    CPrintToChat(client, "%T", "Chat Advert", client, iActive);
+    if (g_cMessageType.IntValue == 0)
+    {
+        CPrintToChat(client, "%T", "Chat Advert", client, iActive);
+    }
+    else if (g_cMessageType.IntValue == 1)
+    {
+        int iUnvoted = GetUnvotedVotes(client, iActive);
+        
+        if (iUnvoted > 0)
+        {
+            CPrintToChat(client, "%T", "Chat Advert", client, iUnvoted);
+        }
+    }
 }
 
 public Action Timer_PrintMessage(Handle timer)
@@ -148,7 +161,19 @@ public Action Timer_PrintMessage(Handle timer)
     {
         LoopValidClients(client)
         {
-            CPrintToChat(client, "%T", "Chat Advert", client, iActive);
+            if (g_cMessageType.IntValue == 0)
+            {
+                CPrintToChat(client, "%T", "Chat Advert", client, iActive);
+            }
+            else if (g_cMessageType.IntValue == 1)
+            {
+                int iUnvoted = GetUnvotedVotes(client, iActive);
+                
+                if (iUnvoted > 0)
+                {
+                    CPrintToChat(client, "%T", "Chat Advert", client, iUnvoted);
+                }
+            }
         }
     }
 }
