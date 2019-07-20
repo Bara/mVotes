@@ -1,0 +1,140 @@
+"Phrases"
+{
+    "Chat Advert"
+    {
+        "#format"   "{1:d}"
+        "en"        "We've {darkblue}{1} {default}active votes. Type {darkblue}!votes {default}to view all available polls."
+        "de"        "Wir haben aktuell {darkblue}{1} {default}aktive Umfrage(n). Gib {darkblue}!votes {default}im Chat ein um alle Umfragen zu sehen."
+    }
+
+    "Menu - Create Vote"
+    {
+        "en"        "Create vote"
+        "de"        "Umfrage erstellen"
+    }
+
+    "Menu - Set title"
+    {
+        "en"        "Set title"
+        "de"        "Titel festlegen"
+    }
+
+    "Menu - Set length"
+    {
+        "en"        "Set length"
+        "de"        "Länge festlegen"
+    }
+
+    "Menu - Set options"
+    {
+        "en"        "Set options"
+        "de"        "Optionen festlegen"
+    }
+
+    "Menu - Current polls"
+    {
+        "en"        "Current polls"
+        "de"        "Aktuele Umfragen"
+    }
+
+    "Menu - Voted"
+    {
+        "en"        "VOTED"
+        "de"        "ABGESTIMMT"
+    }
+
+    "Chat - Type title"
+    {
+        "en"        "Type your title (at least 2 chars) in chat or abort with '!abort'."
+        "de"        "Gib deinen Titel (mindestens 2 Zeichen) im Chat ein oder breche mit '!abort' ab."
+    }
+
+    "Chat - Type length"
+    {
+        "en"        "Type your length in chat or abort with '!abort'."
+        "de"        "Gib eine Länge im Chat ein oder breche mit '!abort' ab."
+    }
+
+    "Chat - Type options"
+    {
+        "en"        "Type your options in chat or abort with '!abort'. Separate each option with ';'."
+        "de"        "Gib deine Optionen im Chat ein oder breche mit '!abort' ab. Teile jede Option mit ein ';'"
+    }
+
+    "Chat - Title"
+    {
+        "#format"   "{1:s}"
+        "en"        "Title: {darkred}{1}"
+        "de"        "Titel: {darkred}{1}"
+    }
+
+    "Chat - Length"
+    {
+        "#format"   "{1:d}"
+        "en"        "Length: {darkred}{1}"
+        "de"        "Länge: {darkred}{1}"
+    }
+
+    "Chat - Invalid length"
+    {
+        "en"        "Invalid length"
+        "de"        "Ungültige Länge"
+    }
+
+    "Chat - Not numeric length"
+    {
+        "en"        "Length is not numeric"
+        "de"        "Länge ist keine Zahl"
+    }
+
+    "Chat - Option"
+    {
+        "#format"   "{1:s}"
+        "en"        "Option: {darkred}{1}"
+        "de"        "Option: {darkred}{1}"
+    }
+
+    "Chat - More Options"
+    {
+        "en"        "We need more options!"
+        "de"        "Wir brauchen mehr Optionen!"
+    }
+
+    "Chat - Poll Available"
+    {
+        "#format"   "{1:s}"
+        "en"        "Poll {darkblue}{1:s} {default}is now available! Type {darkblue}!votes {default}to view all availables polls."
+        "de"        "Umfrage {darkblue}{1:s} {default}ist jetzt verfügbar! Gib {darkblue}!votes {default}im Chat ein um alle Umfragen zu sehen."
+    }
+
+    "Chat - Voted For"
+    {
+        "#format"   "{1:s},{2:s}"
+        "en"        "You voted for {darkblue}{1} {default}with {darkblue}{2}{default}."
+        "de"        "Sie haben bei der Umfrage {darkblue}{1} {default}mit {darkblue}{2}{default} abgestimmt."
+    }
+
+    "Chat - Function Disabled"
+    {
+        "en"        "This function is currently not available."
+        "de"        "Die Funktion ist derzeit nicht verfügbar."
+    }
+
+    "Chat - Dead Players"
+    {
+        "en"        "This function is just for dead players."
+        "de"        "Diese Funktion ist nur für tote Spieler."
+    }
+
+    "Chat - No longer available"
+    {
+        "en"        "Poll {darkblue}{1:s} {default}is no longer available!"
+        "deen"        "Umfrage {darkblue}{1:s} {default}ist nicht mehr verfügbar!"
+    }
+
+    "Settings reset"
+    {
+        "en"        "Settings were reset!"
+        "de"        "Einstellungen wurden zurückgesetzt!"
+    }
+}

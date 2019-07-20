@@ -1,4 +1,4 @@
-static g_iAntiSpam = -1;
+static int g_iAntiSpam = -1;
 
 void _sqlConnect()
 {
@@ -27,7 +27,6 @@ public void sqlConnect(Database db, const char[] error, any data)
     if (g_cDebug.BoolValue)
     {
         LogMessage("[MVotes.sqlConnect] Connection was successful!");
-        PrintToBaraConsole("[MVotes.sqlConnect] Connection was successful!");
     }
 
     g_dDatabase.SetCharset("utf8mb4");
@@ -83,9 +82,6 @@ void CreateTables()
         LogMessage("[MVotes.CreateTables] Polls Query: %s", sPolls);
         LogMessage("[MVotes.CreateTables] Options Query: %s", sOptions);
         LogMessage("[MVotes.CreateTables] Votes Query: %s", sVotes);
-        PrintToBaraConsole("[MVotes.CreateTables] Polls Query: %s", sPolls);
-        PrintToBaraConsole("[MVotes.CreateTables] Options Query: %s", sOptions);
-        PrintToBaraConsole("[MVotes.CreateTables] Votes Query: %s", sVotes);
     }
 }
 
@@ -103,7 +99,6 @@ public void sqlCreateTables(Database db, DBResultSet results, const char[] error
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.sqlCreateTables] Table: %d, g_iCreateTables: %d", data, g_iCreateTables);
-            PrintToBaraConsole("[MVotes.sqlCreateTables] Table: %d, g_iCreateTables: %d", data, g_iCreateTables);
         }
 
         if (g_iCreateTables == 3)
@@ -126,7 +121,6 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.sqlLoadPolls] HasResults: %d RowCount: %d", results.HasResults, results.RowCount);
-            PrintToBaraConsole("[MVotes.sqlLoadPolls] HasResults: %d RowCount: %d", results.HasResults, results.RowCount);
         }
 
         if (results.HasResults)
@@ -152,18 +146,17 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
                 {
                     int iPolls[ePolls];
 
-                    iPolls[eID] = iPoll;
-                    iPolls[eStatus] = bStatus;
-                    iPolls[eCreated] = iCreated;
-                    iPolls[eExpire] = iExpire;
-                    Format(iPolls[eTitle], sizeof(sTitle), sTitle);
+                    iPolls[pID] = iPoll;
+                    iPolls[pStatus] = bStatus;
+                    iPolls[pCreated] = iCreated;
+                    iPolls[pExpire] = iExpire;
+                    Format(iPolls[pTitle], sizeof(sTitle), sTitle);
 
                     g_aPolls.PushArray(iPolls[0]);
 
                     if (g_cDebug.BoolValue)
                     {
-                        LogMessage("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExpire], iPolls[eTitle]);
-                        PrintToBaraConsole("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExpire], iPolls[eTitle]);
+                        LogMessage("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[pID], iPolls[pStatus], iPolls[pCreated], iPolls[pExpire], iPolls[pTitle]);
                     }
 
                     char sOptions[128];
@@ -192,7 +185,6 @@ public void sqlLoadOptions(Database db, DBResultSet results, const char[] error,
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.sqlLoadOptions] HasResults: %d RowCount: %d", results.HasResults, results.RowCount);
-            PrintToBaraConsole("[MVotes.sqlLoadOptions] HasResults: %d RowCount: %d", results.HasResults, results.RowCount);
         }
 
         if (results.HasResults)
@@ -205,18 +197,17 @@ public void sqlLoadOptions(Database db, DBResultSet results, const char[] error,
                 char sOption[64];
                 results.FetchString(2, sOption, sizeof(sOption));
 
-                int iOption[ePolls];
+                int iOption[eOptions];
 
-                iOption[eID] = iOptionID;
-                iOption[ePoll] = iPoll;
-                Format(iOption[eOption], sizeof(sOption), sOption);
+                iOption[oID] = iOptionID;
+                iOption[oPoll] = iPoll;
+                Format(iOption[oOption], sizeof(sOption), sOption);
 
                 g_aOptions.PushArray(iOption[0]);
 
                 if (g_cDebug.BoolValue)
                 {
-                    LogMessage("[MVotes.sqlLoadOptions.Cache] iOptionID: %d, iPoll: %d, sOption: %s", iOption[eID], iOption[ePoll], iOption[eOption]);
-                    PrintToBaraConsole("[MVotes.sqlLoadOptions.Cache] iOptionID: %d, iPoll: %d, sOption: %s", iOption[eID], iOption[ePoll], iOption[eOption]);
+                    LogMessage("[MVotes.sqlLoadOptions.Cache] iOptionID: %d, iPoll: %d, sOption: %s", iOption[oID], iOption[oPoll], iOption[oOption]);
                 }
             }
         }
@@ -235,7 +226,6 @@ public void sqlClosePoll(Database db, DBResultSet results, const char[] error, i
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.sqlClosePoll] Clear client stuff...");
-            PrintToBaraConsole("[MVotes.sqlClosePoll] Clear client stuff...");
         }
 
         LoopValidClients(i)
@@ -246,7 +236,6 @@ public void sqlClosePoll(Database db, DBResultSet results, const char[] error, i
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.sqlClosePoll] Clear polls array...");
-            PrintToBaraConsole("[MVotes.sqlClosePoll] Clear polls array...");
         }
 
         LoopPollsArray(i)
@@ -254,7 +243,7 @@ public void sqlClosePoll(Database db, DBResultSet results, const char[] error, i
             int iPolls[ePolls];
             g_aPolls.GetArray(i, iPolls[0]);
 
-            if (iPolls[eID] == poll)
+            if (iPolls[pID] == poll)
             {
                 g_aPolls.Erase(i);
                 break;
@@ -264,15 +253,14 @@ public void sqlClosePoll(Database db, DBResultSet results, const char[] error, i
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.sqlClosePoll] Clear options array...");
-            PrintToBaraConsole("[MVotes.sqlClosePoll] Clear options array...");
         }
 
         LoopOptionsArray(i)
         {
-            int iOptions[eOption];
+            int iOptions[eOptions];
             g_aOptions.GetArray(i, iOptions[0]);
 
-            if (iOptions[ePoll] == poll)
+            if (iOptions[oPoll] == poll)
             {
                 g_aOptions.Erase(i);
             }
@@ -285,7 +273,6 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
     if (db == null || strlen(error) > 0)
     {
         LogError("[MVotes.sqlInsertPoll] Query failed: %s", error);
-        PrintToBaraConsole("[MVotes.sqlInsertPoll] Query failed: %s", error);
         delete dp;
         return;
     }
@@ -305,23 +292,21 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.sqlInsertPoll] PollID: %d Title: %s, Created: %d, Expire: %d, Options: %d, Options.Length: %d", iPoll, sTitle, iCreated, iExpire, aOptions, aOptions.Length);
-            PrintToBaraConsole("[MVotes.sqlInsertPoll] PollID: %d Title: %s, Created: %d, Expire: %d, Options: %d, Options.Length: %d", iPoll, sTitle, iCreated, iExpire, aOptions, aOptions.Length);
         }
 
         int iPolls[ePolls];
 
-        iPolls[eID] = iPoll;
-        iPolls[eStatus] = bStatus;
-        iPolls[eCreated] = iCreated;
-        iPolls[eExpire] = iExpire;
-        Format(iPolls[eTitle], sizeof(sTitle), sTitle);
+        iPolls[pID] = iPoll;
+        iPolls[pStatus] = bStatus;
+        iPolls[pCreated] = iCreated;
+        iPolls[pExpire] = iExpire;
+        Format(iPolls[pTitle], sizeof(sTitle), sTitle);
 
         g_aPolls.PushArray(iPolls[0]);
 
         if (g_cDebug.BoolValue)
         {
-            LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExpire], iPolls[eTitle]);
-            PrintToBaraConsole("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[eID], iPolls[eStatus], iPolls[eCreated], iPolls[eExpire], iPolls[eTitle]);
+            LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[pID], iPolls[pStatus], iPolls[pCreated], iPolls[pExpire], iPolls[pTitle]);
         }
 
         LoopCustomArray(i, aOptions)
@@ -332,7 +317,6 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
             if (g_cDebug.BoolValue)
             {
                 LogMessage("[MVotes.sqlInsertPoll] Poll: %d, Option: %s", iPoll, sOption);
-                PrintToBaraConsole("[MVotes.sqlInsertPoll] Poll: %d, Option: %s", iPoll, sOption);
             }
 
             char sInsert[256];
@@ -341,7 +325,6 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
             if (g_cDebug.BoolValue)
             {
                 LogMessage("[MVotes.sqlInsertPoll] Insert Query: %s", sInsert);
-                PrintToBaraConsole("[MVotes.sqlInsertPoll] Insert Query: %s", sInsert);
             }
 
             DataPack dp2 = new DataPack();
@@ -360,7 +343,6 @@ public void sqlInsertOptions(Database db, DBResultSet results, const char[] erro
     if (db == null || strlen(error) > 0)
     {
         LogError("[MVotes.sqlInsertOptions] Query failed: %s", error);
-        PrintToBaraConsole("[MVotes.sqlInsertOptions] Query failed: %s", error);
         delete dp;
         return;
     }
@@ -378,21 +360,19 @@ public void sqlInsertOptions(Database db, DBResultSet results, const char[] erro
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.sqlLoadOptions] PollID: %d Title: %s, sOption: %s, iOption: %d", iPoll, sTitle, sOption, iOptionID);
-            PrintToBaraConsole("[MVotes.sqlLoadOptions] PollID: %d Title: %s, sOption: %s, iOption: %d", iPoll, sTitle, sOption, iOptionID);
         }
 
-        int iOption[ePolls];
+        int iOption[eOptions];
 
-        iOption[eID] = iOptionID;
-        iOption[ePoll] = iPoll;
-        Format(iOption[eOption], sizeof(sOption), sOption);
+        iOption[oID] = iOptionID;
+        iOption[oPoll] = iPoll;
+        Format(iOption[oOption], sizeof(sOption), sOption);
 
         g_aOptions.PushArray(iOption[0]);
 
         if (g_cDebug.BoolValue)
         {
-            LogMessage("[MVotes.sqlLoadOptions.Cache] iOptionID: %d, iPoll: %d, sOption: %s", iOption[eID], iOption[ePoll], iOption[eOption]);
-            PrintToBaraConsole("[MVotes.sqlLoadOptions.Cache] iOptionID: %d, iPoll: %d, sOption: %s", iOption[eID], iOption[ePoll], iOption[eOption]);
+            LogMessage("[MVotes.sqlLoadOptions.Cache] iOptionID: %d, iPoll: %d, sOption: %s", iOption[oID], iOption[oPoll], iOption[oOption]);
         }
 
         if (g_cMessageAll.BoolValue && (g_iAntiSpam == -1 || (g_iAntiSpam + 5 < GetTime())))
@@ -408,7 +388,6 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
     if (db == null || strlen(error) > 0)
     {
         LogError("[MVotes.sqlPlayerVote] Query failed: %s", error);
-        PrintToBaraConsole("[MVotes.sqlPlayerVote] Query failed: %s", error);
         delete dp;
         return;
     }
@@ -444,9 +423,9 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
             int iPolls[ePolls];
             g_aPolls.GetArray(i, iPolls[0]);
 
-            if (iPolls[eID] == poll)
+            if (iPolls[pID] == poll)
             {
-                strcopy(sTitle, sizeof(sTitle), iPolls[eTitle]);
+                strcopy(sTitle, sizeof(sTitle), iPolls[pTitle]);
                 break;
             }
         }
@@ -456,9 +435,9 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
             int iOptions[eOptions];
             g_aOptions.GetArray(i, iOptions[0]);
 
-            if (iOptions[eID] == option)
+            if (iOptions[oID] == option)
             {
-                strcopy(sOption, sizeof(sOption), iOptions[eOption]);
+                strcopy(sOption, sizeof(sOption), iOptions[oOption]);
                 break;
             }
         }
@@ -470,9 +449,9 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
             int iVotes[eVotes];
             g_aVotes.GetArray(i, iVotes[0]);
 
-            if (StrEqual(sCommunity, iVotes[eCommunity], false))
+            if (StrEqual(sCommunity, iVotes[vCommunity], false))
             {
-                if (iVotes[ePollID] == poll)
+                if (iVotes[vPollID] == poll)
                 {
                     g_aVotes.Erase(i);
                 }
@@ -480,11 +459,11 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
         }
 
         int iVotes[eVotes];
-        iVotes[eID] = results.InsertId;
-        iVotes[eTime] = time;
-        iVotes[ePollID] = poll;
-        iVotes[eOptionID] = option;
-        Format(iVotes[eCommunity], sizeof(sCommunity), sCommunity);
+        iVotes[vID] = results.InsertId;
+        iVotes[vTime] = time;
+        iVotes[vPollID] = poll;
+        iVotes[vOptionID] = option;
+        Format(iVotes[vCommunity], sizeof(sCommunity), sCommunity);
 
         g_aVotes.PushArray(iVotes[0]);
 
@@ -497,7 +476,6 @@ public void sqlLoadClientVotes(Database db, DBResultSet results, const char[] er
     if (db == null || strlen(error) > 0)
     {
         LogError("[MVotes.sqlLoadClientVotes] Query failed: %s", error);
-        PrintToBaraConsole("[MVotes.sqlLoadClientVotes] Query failed: %s", error);
         return;
     }
     else
@@ -509,7 +487,6 @@ public void sqlLoadClientVotes(Database db, DBResultSet results, const char[] er
             if (g_cDebug.BoolValue)
             {
                 LogMessage("[MVotes.sqlLoadClientVotes] HasResults: %d RowCount: %d", results.HasResults, results.RowCount);
-                PrintToBaraConsole("[MVotes.sqlLoadClientVotes] HasResults: %d RowCount: %d", results.HasResults, results.RowCount);
             }
 
             if (results.HasResults)
@@ -528,15 +505,15 @@ public void sqlLoadClientVotes(Database db, DBResultSet results, const char[] er
                         int iPolls[ePolls];
                         g_aPolls.GetArray(i, iPolls[0]);
 
-                        if (iPolls[eID] == iPoll)
+                        if (iPolls[pID] == iPoll)
                         {
-                            if (iPolls[eExpire] > GetTime() && iPolls[eStatus])
+                            if (iPolls[pExpire] > GetTime() && iPolls[pStatus])
                             {
                                 bStatus = true;
                             }
                             else
                             {
-                                ClosePoll(iPolls[eID]);
+                                ClosePoll(iPolls[pID]);
                                 continue;
                             }
                         }
@@ -551,18 +528,17 @@ public void sqlLoadClientVotes(Database db, DBResultSet results, const char[] er
                     results.FetchString(4, sCommunity, sizeof(sCommunity));
 
                     int iVotes[eVotes];
-                    iVotes[eID] = iID;
-                    iVotes[eTime] = iTime;
-                    iVotes[ePollID] = iPoll;
-                    iVotes[eOptionID] = iOption;
-                    Format(iVotes[eCommunity], sizeof(sCommunity), sCommunity);
+                    iVotes[vID] = iID;
+                    iVotes[vTime] = iTime;
+                    iVotes[vPollID] = iPoll;
+                    iVotes[vOptionID] = iOption;
+                    Format(iVotes[vCommunity], sizeof(sCommunity), sCommunity);
 
                     g_aVotes.PushArray(iVotes[0]);
 
                     if (g_cDebug.BoolValue)
                     {
-                        LogMessage("[MVotes.sqlLoadClientVotes.Cache] iID: %d, iTime: %d, iPoll: %d, iOption: %d, sCommunity: %s", iVotes[eID], iVotes[eTime], iVotes[ePollID], iVotes[eOptionID], iVotes[eCommunity]);
-                        PrintToBaraConsole("[MVotes.sqlLoadClientVotes.Cache] iID: %d, iTime: %d, iPoll: %d, iOption: %d, sCommunity: %s", iVotes[eID], iVotes[eTime], iVotes[ePollID], iVotes[eOptionID], iVotes[eCommunity]);
+                        LogMessage("[MVotes.sqlLoadClientVotes.Cache] iID: %d, iTime: %d, iPoll: %d, iOption: %d, sCommunity: %s", iVotes[vID], iVotes[vTime], iVotes[vPollID], iVotes[vOptionID], iVotes[vCommunity]);
                     }
                 }
             }

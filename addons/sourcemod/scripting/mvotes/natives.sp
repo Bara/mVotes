@@ -23,13 +23,13 @@ public int Native_ClosePoll(Handle plugin, int numParams)
         int iPolls[ePolls];
         g_aPolls.GetArray(i, iPolls[0]);
 
-        if (iPolls[eExpire] <= GetTime())
+        if (iPolls[pExpire] <= GetTime())
         {
-            ClosePoll(iPolls[eID]);
+            ClosePoll(iPolls[pID]);
             continue;
         }
 
-        if (iPolls[eID] == poll)
+        if (iPolls[pID] == poll)
         {
             bFound = true;
             break;

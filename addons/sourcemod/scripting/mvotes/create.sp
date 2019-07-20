@@ -34,7 +34,6 @@ void ShowCreateMenu(int client)
     if (g_cDebug.BoolValue)
     {
         LogMessage("[MVotes.ShowCreateMenu] called");
-        PrintToBaraConsole("[MVotes.ShowCreateMenu] called");
     }
 
     char sBuffer[32];
@@ -101,7 +100,6 @@ public int Menu_CreateMenu(Menu menu, MenuAction action, int client, int param)
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.Menu_CreateMenu] Param: %s", sParam);
-            PrintToBaraConsole("[MVotes.Menu_CreateMenu] Param: %s", sParam);
         }
 
         if (StrEqual(sParam, "title", false))
@@ -202,7 +200,6 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
                     if (g_cDebug.BoolValue)
                     {
                         LogMessage("[MVotes.OnClientSayCommand] Added option %d: %s", i+1, sOptions[i]);
-                        PrintToBaraConsole("[MVotes.OnClientSayCommand] Added option %d: %s", i+1, sOptions[i]);
                     }
                 }
             }
@@ -243,7 +240,6 @@ void ResetCreateVote(int client, bool message = false)
     if (g_cDebug.BoolValue)
     {
         LogMessage("[MVotes.ResetCreateVote] called");
-        PrintToBaraConsole("[MVotes.ResetCreateVote] called");
     }
 
     if (message && IsClientValid(client))
@@ -251,7 +247,6 @@ void ResetCreateVote(int client, bool message = false)
         if (g_cDebug.BoolValue)
         {
             LogMessage("[MVotes.ResetCreateVote] 3");
-            PrintToBaraConsole("[MVotes.ResetCreateVote] 3");
         }
 
         CPrintToChat(client, "%T", "Settings reset", client);
@@ -261,42 +256,42 @@ void ResetCreateVote(int client, bool message = false)
 // Stock taken from smlib - https://github.com/bcserv/smlib/blob/62da6de/scripting/include/smlib/strings.inc#L16
 bool IsNumericString(const char[] str)
 {
-	int x = 0;
-	int dotsFound = 0;
-	int numbersFound = 0;
+    int x = 0;
+    int dotsFound = 0;
+    int numbersFound = 0;
 
-	if (str[x] == '+' || str[x] == '-')
+    if (str[x] == '+' || str[x] == '-')
     {
-		x++;
-	}
+        x++;
+    }
 
-	while (str[x] != '\0') {
+    while (str[x] != '\0') {
 
-		if (IsCharNumeric(str[x]))
+        if (IsCharNumeric(str[x]))
         {
-			numbersFound++;
-		}
-		else if (str[x] == '.')
+            numbersFound++;
+        }
+        else if (str[x] == '.')
         {
-			dotsFound++;
+            dotsFound++;
 
-			if (dotsFound > 1)
+            if (dotsFound > 1)
             {
-				return false;
-			}
-		}
-		else
+                return false;
+            }
+        }
+        else
         {
-			return false;
-		}
+            return false;
+        }
 
-		x++;
-	}
+        x++;
+    }
 
-	if (!numbersFound)
+    if (!numbersFound)
     {
-		return false;
-	}
+        return false;
+    }
 
-	return true;
+    return true;
 }
