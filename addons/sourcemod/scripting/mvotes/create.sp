@@ -1,9 +1,11 @@
 static bool g_bTitle[MAXPLAYERS + 1] = { false, ... };
 static bool g_bLength[MAXPLAYERS + 1] = { false, ... };
 static bool g_bOptions[MAXPLAYERS + 1] = { false, ... };
+static bool g_bVotes[MAXPLAYERS + 1] = { false, ... };
 
 static char g_sTitle[MAXPLAYERS + 1][64];
 static int g_iLength[MAXPLAYERS + 1] = { -1, ...};
+static int g_iVotes[MAXPLAYERS + 1] = { -1, ... };
 
 static ArrayList g_aCOptions[MAXPLAYERS + 1] = { null, ...};
 
@@ -76,16 +78,27 @@ void ShowCreateMenu(int client)
 
     if (g_aCOptions[client].Length >= g_cMinOptions.IntValue)
     {
-        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Set options", client);
+        Format(sBuffer, sizeof(sBuffer), "[X] %T ", "Menu - Set options", client);
         menu.AddItem("options", sBuffer);
     }
     else
     {
-        Format(sBuffer, sizeof(sBuffer), "[ ] %T\n ", "Menu - Set options", client);
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T ", "Menu - Set options", client);
         menu.AddItem("options", sBuffer);
     }
 
-    if (strlen(g_sTitle[client]) > 3 && g_iLength[client] >= g_cMinLength.IntValue && g_aCOptions[client].Length >= g_cMinOptions.IntValue)
+    if (g_iVotes[client] > 0)
+    {
+        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Set votes", client);
+        menu.AddItem("votes", sBuffer);
+    }
+    else
+    {
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T\n ", "Menu - Set votes", client);
+        menu.AddItem("votes", sBuffer);
+    }
+
+    if (strlen(g_sTitle[client]) > 3 && g_iLength[client] >= g_cMinLength.IntValue && g_aCOptions[client].Length >= g_cMinOptions.IntValue && g_iVotes[client] > 0)
     {
         Format(sBuffer, sizeof(sBuffer), "> %T\n ", "Menu - Create Vote", client);
         menu.AddItem("create", sBuffer);
@@ -126,10 +139,19 @@ public int Menu_CreateMenu(Menu menu, MenuAction action, int client, int param)
             g_bOptions[client] = true;
             CPrintToChat(client, "%T", "Chat - Type options", client, g_cMinOptions.IntValue);
         }
+        else if (StrEqual(sParam, "votes", false))
+        {
+            g_bVotes[client] = true;
+            PrintToChat(client, "%T", "Chat - Type votes", client);
+        }
         else if (StrEqual(sParam, "create", false))
         {
-            MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client]);
-            CreateTimer(1.0, Timer_ResetCreateVote, GetClientUserId(client));
+            int reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client]);
+
+            DataPack pack = new DataPack();
+            pack.WriteCell(GetClientUserId(client));
+            pack.WriteCell(reason);
+            CreateTimer(1.0, Timer_ResetCreateVote, pack);
         }
         else if (StrEqual(sParam, "exit", false))
         {
@@ -142,13 +164,42 @@ public int Menu_CreateMenu(Menu menu, MenuAction action, int client, int param)
     }
 }
 
-public Action Timer_ResetCreateVote(Handle timer, int userid)
+public Action Timer_ResetCreateVote(Handle timer, DataPack pack)
 {
-    int client = GetClientOfUserId(userid);
+    pack.Reset();
+
+    int client = GetClientOfUserId(pack.ReadCell());
+    int reason = pack.ReadCell();
+
+    delete pack;
 
     if (IsClientValid(client))
     {
         ResetCreateVote(client);
+
+        if (reason != -1)
+        {
+            char sReason[64];
+
+            if (reason == 0)
+            {
+                Format(sReason, sizeof(sReason), "Invalid time");
+            }
+            else if (reason == 1)
+            {
+                Format(sReason, sizeof(sReason), "Invalid vote length");
+            }
+            else if (reason == 2)
+            {
+                Format(sReason, sizeof(sReason), "Invalid options");
+            }
+            else if (reason == 3)
+            {
+                Format(sReason, sizeof(sReason), "Invalid votes per player");
+            }
+
+            CPrintToChat(client, "Can't create vote. (%s)", sReason);
+        }
     }
 }
 
@@ -217,10 +268,45 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
                 CPrintToChat(client, "%T", "Chat - More Options", client);
             }
         }
+        else if (g_bVotes[client])
+        {
+            if (IsNumericString(message))
+            {
+                int iVotes = StringToInt(message);
+
+                if (iVotes > 0)
+                {
+                    if (g_aCOptions[client].Length >= g_cMinOptions.IntValue)
+                    {
+                        if (g_aCOptions[client].Length > iVotes)
+                        {
+                            g_iVotes[client] = iVotes;
+                        }
+                        else
+                        {
+                            CPrintToChat(client, "%T", "Chat - Too much votes", client);
+                        }
+                    }
+                    else
+                    {
+                        CPrintToChat(client, "%T", "Chat - No options", client);
+                    }
+                }
+                else
+                {
+                    CPrintToChat(client, "%T", "Chat - Votes at least", client);
+                }
+            }
+            else
+            {
+                CPrintToChat(client, "%T", "Chat - Not numeric length", client);
+            }
+        }
 
         g_bTitle[client] = false;
         g_bLength[client] = false;
         g_bOptions[client] = false;
+        g_bVotes[client] = false;
 
         ShowCreateMenu(client);
 
@@ -232,7 +318,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 
 bool CheckClientStatus(int client)
 {
-    return (g_bTitle[client] || g_bLength[client] || g_bOptions[client]);
+    return (g_bTitle[client] || g_bLength[client] || g_bOptions[client] || g_bVotes[client]);
 }
 
 void ResetCreateVote(int client, bool message = false)
@@ -240,6 +326,7 @@ void ResetCreateVote(int client, bool message = false)
     g_bTitle[client] = false;
     g_bLength[client] = false;
     g_bOptions[client] = false;
+    g_bVotes[client] = false;
 
     Format(g_sTitle[client], sizeof(g_sTitle[]), "");
     g_iLength[client] = -1;

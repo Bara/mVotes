@@ -9,7 +9,9 @@ public int Native_CreatePoll(Handle plugin, int numParams)
 
     ArrayList aOptions = view_as<ArrayList>(CloneHandle(GetNativeCell(4)));
 
-    return CreatePoll(client, sTitle, iLength, aOptions);
+    int iVotes = GetNativeCell(5);
+
+    return CreatePoll(client, sTitle, iLength, aOptions, iVotes);
 }
 
 public int Native_ClosePoll(Handle plugin, int numParams)

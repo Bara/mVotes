@@ -20,7 +20,7 @@ stock void LoadPolls()
     g_aVotes = new ArrayList(sizeof(g_iVotes));
 
     char sQuery[256];
-    g_dDatabase.Format(sQuery, sizeof(sQuery), "SELECT `id`, `status`, `title`, `created`, `expire` FROM `mvotes_polls` WHERE `status` = '1' ORDER BY `id` ASC");
+    g_dDatabase.Format(sQuery, sizeof(sQuery), "SELECT `id`, `status`, `title`, `created`, `expire`, `votes` FROM `mvotes_polls` WHERE `status` = '1' ORDER BY `id` ASC");
 
     if (g_cDebug.BoolValue)
     {
@@ -56,7 +56,7 @@ stock bool IsClientValid(int client)
     return false;
 }
 
-stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList options)
+stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList options, int votes)
 {
     if (g_cDebug.BoolValue)
     {
@@ -71,6 +71,16 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
         }
 
         return 2;
+    }
+
+    if (votes < 1 || options.Length <= votes)
+    {
+        if (g_cDebug.BoolValue)
+        {
+            LogMessage("[MVotes.CreatePoll] Poll \"%s\" can't created (We need less votes per players (votes %d, options: %d))...", title, votes, options.Length);
+        }
+
+        return 3;
     }
 
     if (length < g_cMinLength.IntValue)
@@ -120,7 +130,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     Format(sIP, sizeof(sIP), "%d.%d.%d.%d", _iIP[0], _iIP[1], _iIP[2], _iIP[3]);
 
     char sQuery[1024];
-    Format(sQuery, sizeof(sQuery), "INSERT INTO `mvotes_polls` (`status`, `title`, `created`, `expire`, `admin`, `ip`, `port`) VALUES ('1', \"%s\", '%d', '%d', \"%s\", \"%s\", '%d');", title, g_iTime, g_iExpire, sAdmin, sIP, iPort);
+    Format(sQuery, sizeof(sQuery), "INSERT INTO `mvotes_polls` (`status`, `title`, `created`, `expire`, `votes`, `admin`, `ip`, `port`) VALUES ('1', \"%s\", '%d', '%d', '%d', \"%s\", \"%s\", '%d');", title, g_iTime, g_iExpire, votes, sAdmin, sIP, iPort);
 
     if (g_cDebug.BoolValue)
     {
@@ -133,6 +143,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     dp.WriteCell(g_iTime);
     dp.WriteCell(g_iExpire);
     dp.WriteCell(options);
+    dp.WriteCell(votes);
 
     return -1;
 }
@@ -234,7 +245,7 @@ void ListPolls(int client)
             Format(sTitle, sizeof(sTitle), "[%d] %s", iPolls[pID], sTitle);
         }
 
-        if (!bVoted || (bVoted && g_cAllowRevote.BoolValue))
+        if (!bVoted || (bVoted && g_cAllowDelete.BoolValue))
         {
             menu.AddItem(sPollID, sTitle);
         }
@@ -284,7 +295,10 @@ void ListPollOptions(int client, int poll)
             continue;
         }
 
-        menu.SetTitle(iPolls[pTitle]);
+        char sTitle[32];
+        Format(sTitle, sizeof(sTitle), "%s\nVotes: x/%d\n ", iPolls[pTitle], iPolls[pVotes]); // TOOD: Add translation
+
+        menu.SetTitle(sTitle);
         break;
     }
 
