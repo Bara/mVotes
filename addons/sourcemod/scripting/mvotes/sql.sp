@@ -51,6 +51,7 @@ void CreateTables()
             `title` varchar(64) NOT NULL, \
             `created` int(11) NOT NULL, \
             `expire` int(11) NOT NULL, \
+            `votes` int(11) NOT NULL, \
             `admin` varchar(24) NOT NULL, \
             `ip` varchar(18) NOT NULL, \
             `port` int(6) NOT NULL, \
@@ -88,7 +89,7 @@ void CreateTables()
             `communityid` varchar(24) NOT NULL, \
             `name` varchar(128) NOT NULL, \
             PRIMARY KEY (`id`), \
-            UNIQUE KEY (`poll`, `communityid`) \
+            UNIQUE KEY (`communityid`, `poll`, `option`) \
         ) ENGINE=InnoDB CHARSET=\"%s\"", g_sCharset);
 
     if (g_cDebug.BoolValue)
@@ -149,6 +150,7 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
 
                 int iCreated = results.FetchInt(3);
                 int iExpire = results.FetchInt(4);
+                int iVotes = results.FetchInt(5);
 
                 if (iExpire < GetTime())
                 {
@@ -164,13 +166,14 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
                     iPolls[pStatus] = bStatus;
                     iPolls[pCreated] = iCreated;
                     iPolls[pExpire] = iExpire;
+                    iPolls[pVotes] = iVotes;
                     Format(iPolls[pTitle], sizeof(sTitle), sTitle);
 
                     g_aPolls.PushArray(iPolls[0]);
 
                     if (g_cDebug.BoolValue)
                     {
-                        LogMessage("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[pID], iPolls[pStatus], iPolls[pCreated], iPolls[pExpire], iPolls[pTitle]);
+                        LogMessage("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s, iVotes: %d", iPolls[pID], iPolls[pStatus], iPolls[pCreated], iPolls[pExpire], iPolls[pTitle], iPolls[pVotes]);
                     }
 
                     char sQuery[256];
@@ -298,6 +301,7 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
         int iCreated = dp.ReadCell();
         int iExpire = dp.ReadCell();
         ArrayList aOptions = dp.ReadCell();
+        int iVotes = dp.ReadCell();
         delete dp;
 
         int iPoll = results.InsertId;
@@ -305,7 +309,7 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
 
         if (g_cDebug.BoolValue)
         {
-            LogMessage("[MVotes.sqlInsertPoll] PollID: %d Title: %s, Created: %d, Expire: %d, Options: %d, Options.Length: %d", iPoll, sTitle, iCreated, iExpire, aOptions, aOptions.Length);
+            LogMessage("[MVotes.sqlInsertPoll] PollID: %d Title: %s, Created: %d, Expire: %d, Options: %d, Options.Length: %d, Votes: %d", iPoll, sTitle, iCreated, iExpire, aOptions, aOptions.Length, iVotes);
         }
 
         int iPolls[ePolls];
@@ -314,13 +318,14 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
         iPolls[pStatus] = bStatus;
         iPolls[pCreated] = iCreated;
         iPolls[pExpire] = iExpire;
+        iPolls[pVotes] = iVotes;
         Format(iPolls[pTitle], sizeof(sTitle), sTitle);
 
         g_aPolls.PushArray(iPolls[0]);
 
         if (g_cDebug.BoolValue)
         {
-            LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s", iPolls[pID], iPolls[pStatus], iPolls[pCreated], iPolls[pExpire], iPolls[pTitle]);
+            LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s, Votes: %d", iPolls[pID], iPolls[pStatus], iPolls[pCreated], iPolls[pExpire], iPolls[pTitle], iPolls[pVotes]);
         }
 
         LoopCustomArray(i, aOptions)

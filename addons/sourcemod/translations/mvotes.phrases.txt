@@ -31,6 +31,12 @@
         "de"        "Optionen festlegen"
     }
 
+    "Menu - Set votes"
+    {
+        "en"        "Set votes/player"
+        "de"        "Stimmen/Spieler festlegen"
+    }
+
     "Menu - Current polls"
     {
         "en"        "Current polls"
@@ -61,6 +67,12 @@
         "#format"   "{1:d}"
         "en"        "Type your options (at least {1}) in chat or abort with '!abort'. Separate each option with ';'."
         "de"        "Gib deine Optionen (mindestens {1}) im Chat ein oder breche mit '!abort' ab. Teile jede Option mit ein ';'"
+    }
+
+    "Chat - Type votes"
+    {
+        "en"        "Type the amount of votes per player (default 1) for one vote in chat or abort with '!abort'. It can't be higher as the amount of options."
+        "de"        "Gib die Anzahl an Abstimmungen pro Spieler (Standard 1) für die Umfrage im Chat an oder breche mit '!abort'. Es kann nicht höher wie die Anzahl der Optionen sein."
     }
 
     "Chat - Title"
@@ -138,5 +150,23 @@
     {
         "en"        "Settings were reset!"
         "de"        "Einstellungen wurden zurückgesetzt!"
+    }
+
+    "Chat - Too much votes"
+    {
+        "en"        "You can't set more votes as available options."
+        "de"        "Sie können nicht mehr Stimmen wie verfügbare Optionen haben."
+    }
+
+    "Chat - No options"
+    {
+        "en"        "You can't set amount of votes when you don't have set the options."
+        "de"        "Sie können keine Anzahl von Stimmen festlegen, wenn Sie keine Optionen fesetgelegt haben."
+    }
+
+    "Chat - Votes at least"
+    {
+        "en"        "You need at least 1 vote per vote, otherwise it wouldn't make."
+        "de"        "Du brauchst wenigstens 1 Stimme pro Abstimmung, ansonsten macht es kein Sinn."
     }
 }

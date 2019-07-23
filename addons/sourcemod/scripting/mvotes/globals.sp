@@ -5,7 +5,7 @@ ConVar g_cEntry = null;
 ConVar g_cMinOptions = null;
 ConVar g_cMinLength = null;
 ConVar g_cMessageAll = null;
-ConVar g_cAllowRevote = null;
+ConVar g_cAllowDelete = null;
 ConVar g_cDeadPlayers = null;
 ConVar g_cPluginTag = null;
 ConVar g_cMessageOnDeath = null;
@@ -23,6 +23,7 @@ enum ePolls
     bool:pStatus,
     pCreated,
     pExpire,
+    pVotes,
     String:pTitle[64]
 };
 
