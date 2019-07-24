@@ -49,6 +49,13 @@
         "de"        "ABGESTIMMT"
     }
 
+    "Menu - Options menu"
+    {
+        "#format"    "{1:s},{2:d},{3:d}"
+        "en"        "{1}\nMultichoice: {2}/{3}\n "
+        "de"        "{1}\nAntworten: {2}/{3}\n "
+    }
+
     "Chat - Type title"
     {
         "en"        "Type your title (at least 2 chars) in chat or abort with '!abort'."

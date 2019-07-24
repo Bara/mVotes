@@ -245,14 +245,7 @@ void ListPolls(int client)
             Format(sTitle, sizeof(sTitle), "[%d] %s", iPolls[pID], sTitle);
         }
 
-        if (!bVoted || (bVoted && g_cAllowDelete.BoolValue))
-        {
-            menu.AddItem(sPollID, sTitle);
-        }
-        else 
-        {
-            menu.AddItem(sPollID, sTitle, ITEMDRAW_DISABLED);
-        }
+        menu.AddItem(sPollID, sTitle);
     }
 
     menu.ExitButton = true;
@@ -295,8 +288,17 @@ void ListPollOptions(int client, int poll)
             continue;
         }
 
+        int iVotes = GetAmountOfVotes(client, iPolls[pID]);
         char sTitle[32];
-        Format(sTitle, sizeof(sTitle), "%s\nVotes: x/%d\n ", iPolls[pTitle], iPolls[pVotes]); // TOOD: Add translation
+
+        if (iVotes > 1)
+        {
+            Format(sTitle, sizeof(sTitle), "%T", "Menu - Options menu", client, iPolls[pTitle], iVotes, iPolls[pVotes]);
+        }
+        else
+        {
+            strcopy(sTitle, sizeof(sTitle), iPolls[pTitle]);
+        }
 
         menu.SetTitle(sTitle);
         break;
@@ -435,8 +437,8 @@ void PlayerVote(int client, int poll, int option)
     int iTime = GetTime();
 
     g_dDatabase.Format(sQuery, sizeof(sQuery),
-    "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES ('%d', '%d', '%d', \"%s\", \"%N\") \
-    ON DUPLICATE KEY UPDATE `time` = '%d', `option` = '%d', `name` = \"%N\";", iTime, poll, option, sCommunity, client, iTime, option, client);
+        "INSERT INTO `mvotes_votes` (`time`, `poll`, `option`, `communityid`, `name`) VALUES ('%d', '%d', '%d', \"%s\", \"%N\") \
+        ON DUPLICATE KEY UPDATE `time` = '%d', `option` = '%d', `name` = \"%N\";", iTime, poll, option, sCommunity, client, iTime, option, client);
 
     if (g_cDebug.BoolValue)
     {
@@ -573,4 +575,28 @@ int GetUnvotedVotes(int client, int active)
     delete aPolls;
 
     return active;
+}
+
+int GetAmountOfVotes(int client, int poll)
+{
+    char sCommunity[18];
+    if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
+    {
+        return -1;
+    }
+
+    int votes = 0;
+
+    LoopVotesArray(j)
+    {
+        int iVotes[eVotes];
+        g_aVotes.GetArray(j, iVotes[0]);
+
+        if (StrEqual(sCommunity, iVotes[vCommunity], false) && iVotes[vPollID] == poll)
+        {
+            votes++;
+        }
+    }
+
+    return votes;
 }

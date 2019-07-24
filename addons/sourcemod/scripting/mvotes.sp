@@ -51,7 +51,6 @@ public void OnPluginStart()
     g_cMinOptions = AutoExecConfig_CreateConVar("mvotes_min_options", "2", "Required options for a vote", _, true, 2.0);
     g_cMinLength = AutoExecConfig_CreateConVar("mvotes_min_length", "1", "Minimum length (length in minutes) otherwise Vote start will failed", _, true, 1.0);
     g_cMessageAll = AutoExecConfig_CreateConVar("mvotes_message_all", "1", "Print message to all players if a new poll was created? (0 - disable, 1 - enable)", _, true, 0.0, true, 1.0);
-    g_cAllowDelete = AutoExecConfig_CreateConVar("mvotes_allow_delete_vote", "1", "Allow deleting own votes? (0 - disable, 1 - enable", _, true, 0.0, true, 1.0);
     g_cMessageOnDeath = AutoExecConfig_CreateConVar("mvotes_print_message_on_death", "1", "Print message to a player on their death?", _, true, 0.0, true, 1.0);
     g_cDeadPlayers = AutoExecConfig_CreateConVar("mvotes_only_dead_players", "0", "Allow voting just for dead players?", _, true, 0.0, true, 1.0);
     g_cPluginTag = AutoExecConfig_CreateConVar("mvotes_plugin_tag", "{darkred}[MVotes] {default}", "Set plugin tag for all chat messages");

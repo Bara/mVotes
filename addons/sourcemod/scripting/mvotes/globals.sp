@@ -5,7 +5,6 @@ ConVar g_cEntry = null;
 ConVar g_cMinOptions = null;
 ConVar g_cMinLength = null;
 ConVar g_cMessageAll = null;
-ConVar g_cAllowDelete = null;
 ConVar g_cDeadPlayers = null;
 ConVar g_cPluginTag = null;
 ConVar g_cMessageOnDeath = null;
