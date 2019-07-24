@@ -436,6 +436,7 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
         }
 
         char sTitle[64], sOption[32];
+        int iMax = 0;
 
         LoopPollsArray(i)
         {
@@ -445,6 +446,7 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
             if (iPolls[pID] == poll)
             {
                 strcopy(sTitle, sizeof(sTitle), iPolls[pTitle]);
+                iMax = iPolls[pVotes];
                 break;
             }
         }
@@ -463,16 +465,32 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
 
         CPrintToChat(client, "%T", "Chat - Voted For", client, sTitle, sOption);
 
-        LoopVotesArray(i)
-        {
-            int iVotes[eVotes];
-            g_aVotes.GetArray(i, iVotes[0]);
+        int votes = GetAmountOfVotes(client, poll);
 
-            if (StrEqual(sCommunity, iVotes[vCommunity], false))
+        if (g_cDebug.BoolValue)
+        {
+            LogMessage("[MVotes.sqlPlayerVote] Votes: %d, Max Votes: %d", votes, iMax);
+        }
+
+        if (votes >= iMax)
+        {
+            LoopVotesArray(i)
             {
-                if (iVotes[vPollID] == poll)
+                int iVotes[eVotes];
+                g_aVotes.GetArray(i, iVotes[0]);
+
+                if (StrEqual(sCommunity, iVotes[vCommunity], false))
                 {
-                    g_aVotes.Erase(i);
+                    if (iVotes[vPollID] == poll)
+                    {
+                        g_aVotes.Erase(i);
+
+                        char sQuery[512];
+                        Format(sQuery, sizeof(sQuery), "DELETE FROM `mvotes_votes` WHERE `id` = '%d'", iVotes[vID]);
+                        g_dDatabase.Query(sqlDoNothing, sQuery);
+
+                        break;
+                    }
                 }
             }
         }
@@ -562,5 +580,14 @@ public void sqlLoadClientVotes(Database db, DBResultSet results, const char[] er
                 }
             }
         }
+    }
+}
+
+public void sqlDoNothing(Database db, DBResultSet results, const char[] error, int userid)
+{
+    if (db == null || strlen(error) > 0)
+    {
+        LogError("[MVotes.sqlDoNothing] Query failed: %s", error);
+        return;
     }
 }
