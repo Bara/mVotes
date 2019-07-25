@@ -504,7 +504,14 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
 
         g_aVotes.PushArray(iVotes[0]);
 
-        ListPolls(client);
+        if (iMax == 1 || !g_cMenuAfterVote.BoolValue)
+        {
+            ListPolls(client);
+        }
+        else
+        {
+            ListPollOptions(client, poll);
+        }
     }
 }
 
