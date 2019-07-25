@@ -289,11 +289,17 @@ void ListPollOptions(int client, int poll)
         }
 
         int iVotes = GetAmountOfVotes(client, iPolls[pID]);
-        char sTitle[64];
+
+        char sTitle[96];
+        char sBufTitle[64];
+        char sVotes[32];
 
         if (iPolls[pVotes] > 1)
         {
-            Format(sTitle, sizeof(sTitle), "%T", "Menu - Options menu", client, iPolls[pTitle], iVotes, iPolls[pVotes]);
+            strcopy(sBufTitle, sizeof(sBufTitle), iPolls[pTitle]);
+            Format(sVotes, sizeof(sVotes), "%T", "Menu - Options Multichoice", client, iVotes, iPolls[pVotes]);
+
+            Format(sTitle, sizeof(sTitle), "%T", "Menu - Options menu multi", client, sBufTitle, sVotes);
         }
         else
         {
