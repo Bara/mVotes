@@ -248,7 +248,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
             {
                 for (int i = 0; i < iSize; i++)
                 {
-                    if (strlen(sOptions[i]) < 2)
+                    if (strlen(sOptions[i]) < 1)
                     {
                         continue;
                     }
