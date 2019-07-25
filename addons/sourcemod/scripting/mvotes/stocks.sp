@@ -73,7 +73,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
         return 2;
     }
 
-    if (votes < 1 || options.Length <= votes)
+    if (votes < 1 || votes > options.Length)
     {
         if (g_cDebug.BoolValue)
         {
