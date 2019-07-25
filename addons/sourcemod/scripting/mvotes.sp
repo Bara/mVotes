@@ -57,6 +57,7 @@ public void OnPluginStart()
     g_cMessageInterval = AutoExecConfig_CreateConVar("mvotes_message_interval", "120", "Prints every X seconds an message to all players. (0 - Disabled)", _, true, 0.0);
     g_cMessageType = AutoExecConfig_CreateConVar("mvotes_message_type", "1", "Which message? 0 - Print the amount of all active (unvoted + voted) votes, 1 - Print the amount of all active unvoted votes.", _, true, 0.0, true, 1.0);
     g_cAdminFlag = AutoExecConfig_CreateConVar("mvotes_admin_flags", "b", "Admin flags to get access for creating votes");
+    g_cMenuAfterVote = AutoExecConfig_CreateConVar("mvotes_menu_after_vote", "1", "Which menu after vote? 0 - Main Menu, 1 - Menu with the current poll", _, true, 0.0, true, 1.0);
     AutoExecConfig_ExecuteFile();
     AutoExecConfig_CleanFile();
 
