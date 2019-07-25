@@ -289,7 +289,7 @@ void ListPollOptions(int client, int poll)
         }
 
         int iVotes = GetAmountOfVotes(client, iPolls[pID]);
-        char sTitle[32];
+        char sTitle[64];
 
         if (iPolls[pVotes] > 1)
         {
