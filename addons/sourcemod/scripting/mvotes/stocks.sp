@@ -317,9 +317,6 @@ void ListPollOptions(int client, int poll)
 
         if (poll == iOptions[oPoll])
         {
-            char sParam[24];
-            Format(sParam, sizeof(sParam), "%d.%d", poll, iOptions[oID]);
-
             char sCommunity[18];
             if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
             {
@@ -341,6 +338,9 @@ void ListPollOptions(int client, int poll)
                 }
             }
 
+            char sParam[24];
+            Format(sParam, sizeof(sParam), "%d.%d.%d", poll, iOptions[oID], bVoted);
+
             char sOption[64], sVoted[24];
             Format(sVoted, sizeof(sVoted), "%T", "Menu - Voted", client);
 
@@ -353,10 +353,10 @@ void ListPollOptions(int client, int poll)
 
             if (g_cDebug.BoolValue)
             {
-                Format(sOption, sizeof(sOption), "[%d] %s", iOptions[oID], sOption);
+                Format(sOption, sizeof(sOption), "[%d.%d] %s", iOptions[oID], bVoted, sOption);
             }
 
-            if (!bVoted)
+            if (!bVoted || (bVoted && g_cDeleteOwnVotes.BoolValue))
             {
                 menu.AddItem(sParam, sOption);
             }
@@ -379,11 +379,12 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
         char sBuffer[24];
         menu.GetItem(param, sBuffer, sizeof(sBuffer));
 
-        char sIDs[2][12];
+        char sIDs[3][12];
         ExplodeString(sBuffer, ".", sIDs, sizeof(sIDs), sizeof(sIDs[]));
 
         int iPoll = StringToInt(sIDs[0]);
         int iOption = StringToInt(sIDs[1]);
+        bool bVoted = view_as<bool>(StringToInt(sIDs[2]));
 
         LoopPollsArray(i)
         {
@@ -405,10 +406,17 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
 
         if (g_cDebug.BoolValue)
         {
-            LogMessage("[MVotes.Menu_OptionList] Poll: %d (String: %s), Option: %d (String: %s)", iPoll, sIDs[0], iOption, sIDs[1]);
+            LogMessage("[MVotes.Menu_OptionList] Poll: %d (String: %s), Option: %d (String: %s), Voted: %d", iPoll, sIDs[0], iOption, sIDs[1], bVoted);
         }
 
-        PlayerVote(client, iPoll, iOption);
+        if (!bVoted)
+        {
+            PlayerVote(client, iPoll, iOption);
+        }
+        else
+        {
+            DeletePlayerVote(client, iPoll, iOption);
+        }
     }
     else if (action == MenuAction_Cancel)
     {
@@ -605,4 +613,40 @@ int GetAmountOfVotes(int client, int poll)
     }
 
     return votes;
+}
+
+void DeletePlayerVote(int client, int poll, int option)
+{
+    char sCommunity[18];
+    if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
+    {
+        return;
+    }
+
+    int iVoteID = 0;
+
+    LoopVotesArray(i)
+    {
+        int iVotes[eVotes];
+        g_aVotes.GetArray(i, iVotes[0]);
+
+        if (StrEqual(sCommunity, iVotes[vCommunity], false) && iVotes[vPollID] == poll && iVotes[vOptionID] == option)
+        {
+            iVoteID = iVotes[vID];
+            g_aVotes.Erase(i);
+        }
+    }
+
+    if (g_cDebug.BoolValue)
+    {
+        LogMessage("[MVotes.DeletePlayerVote] Vote ID: %d", iVoteID);
+    }
+
+    char sQuery[256];
+    Format(sQuery, sizeof(sQuery), "DELETE FROM `mvotes_votes` WHERE `id` = '%d'", iVoteID);
+
+    DataPack pack = new DataPack();
+    pack.WriteCell(GetClientUserId(client));
+    pack.WriteCell(poll);
+    g_dDatabase.Query(sqlDeletePlayerVote, sQuery, pack);
 }
