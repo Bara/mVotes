@@ -278,7 +278,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
                 {
                     if (g_aCOptions[client].Length >= g_cMinOptions.IntValue)
                     {
-                        if (g_aCOptions[client].Length > iVotes)
+                        if (iVotes <= g_aCOptions[client].Length)
                         {
                             g_iVotes[client] = iVotes;
                         }
