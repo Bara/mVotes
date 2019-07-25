@@ -291,7 +291,7 @@ void ListPollOptions(int client, int poll)
         int iVotes = GetAmountOfVotes(client, iPolls[pID]);
         char sTitle[32];
 
-        if (iVotes > 1)
+        if (iPolls[pVotes] > 1)
         {
             Format(sTitle, sizeof(sTitle), "%T", "Menu - Options menu", client, iPolls[pTitle], iVotes, iPolls[pVotes]);
         }
