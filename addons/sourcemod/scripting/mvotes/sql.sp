@@ -598,3 +598,24 @@ public void sqlDoNothing(Database db, DBResultSet results, const char[] error, i
         return;
     }
 }
+
+
+public void sqlDeletePlayerVote(Database db, DBResultSet results, const char[] error, DataPack pack)
+{
+    if (db == null || strlen(error) > 0)
+    {
+        LogError("[MVotes.sqlDeletePlayerVote] Query failed: %s", error);
+        delete pack;
+        return;
+    }
+
+    pack.Reset();
+    int client = GetClientOfUserId(pack.ReadCell());
+    int poll = pack.ReadCell();
+    delete pack;
+
+    if (IsClientValid(client))
+    {
+        ListPollOptions(client, poll);
+    }
+}
