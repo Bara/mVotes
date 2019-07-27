@@ -13,6 +13,7 @@ ConVar g_cMessageType = null;
 ConVar g_cAdminFlag = null;
 ConVar g_cMenuAfterVote = null;
 ConVar g_cDeleteOwnVotes = null;
+ConVar g_cKeyword = null;
 
 int g_iCreateTables = -1;
 
