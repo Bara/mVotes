@@ -59,7 +59,7 @@ public void OnPluginStart()
     g_cAdminFlag = AutoExecConfig_CreateConVar("mvotes_admin_flags", "k", "Admin flags to get access for creating votes. (Default: k)");
     g_cMenuAfterVote = AutoExecConfig_CreateConVar("mvotes_menu_after_vote", "1", "Which menu after vote? 0 - Main Menu, 1 - Menu with the current poll", _, true, 0.0, true, 1.0);
     g_cDeleteOwnVotes = AutoExecConfig_CreateConVar("mvotes_delete_own_votes", "0", "Allow deleting own votes from a poll? It just work while the Poll is still active.", _, true, 0.0, true, 1.0);
-    g_cKeyword = AutoExecConfig_CreateConVar("mvotes_keyword", ".", "Set server keyword, if you have more servers and want polls for specific servers. (Default. \".\" to show all polls)";
+    g_cKeywords = AutoExecConfig_CreateConVar("mvotes_keywords", ";", "Set server keywords, if you have more servers and want polls for specific servers. Separate each keyword with ; (Default. \";\" to show all polls)");
     AutoExecConfig_ExecuteFile();
     AutoExecConfig_CleanFile();
 

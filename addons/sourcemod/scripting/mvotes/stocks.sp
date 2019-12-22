@@ -15,9 +15,9 @@ stock void LoadPolls()
     delete g_aOptions;
     delete g_aVotes;
 
-    g_aOptions = new ArrayList(sizeof(g_iOptions));
-    g_aPolls = new ArrayList(sizeof(g_iPolls));
-    g_aVotes = new ArrayList(sizeof(g_iVotes));
+    g_aOptions = new ArrayList(sizeof(Option));
+    g_aPolls = new ArrayList(sizeof(Poll));
+    g_aVotes = new ArrayList(sizeof(Vote));
 
     char sQuery[256];
     g_dDatabase.Format(sQuery, sizeof(sQuery), "SELECT `id`, `status`, `title`, `created`, `expire`, `votes` FROM `mvotes_polls` WHERE `status` = '1' ORDER BY `id` ASC");
@@ -172,12 +172,12 @@ void ListPolls(int client)
 
     LoopPollsArray(i)
     {
-        int iPolls[ePolls];
-        g_aPolls.GetArray(i, iPolls[0]);
+        Poll poll;
+        g_aPolls.GetArray(i, poll);
 
-        if (iPolls[pExpire] <= GetTime() || !iPolls[pStatus])
+        if (poll.Expire <= GetTime() || !poll.Status)
         {
-            ClosePoll(iPolls[pID]);
+            ClosePoll(poll.ID);
             continue;
         }
 
@@ -199,7 +199,7 @@ void ListPolls(int client)
         } */
 
         char sPollID[12];
-        IntToString(iPolls[pID], sPollID, sizeof(sPollID));
+        IntToString(poll.ID, sPollID, sizeof(sPollID));
 
         char sCommunity[18];
         if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
@@ -212,13 +212,13 @@ void ListPolls(int client)
 
         LoopVotesArray(j)
         {
-            int iVotes[eVotes];
-            g_aVotes.GetArray(j, iVotes[0]);
+            Vote vote;
+            g_aVotes.GetArray(j, vote);
 
-            if (StrEqual(sCommunity, iVotes[vCommunity], false) && iVotes[vPollID] == iPolls[pID])
+            if (StrEqual(sCommunity, vote.Community, false) && vote.PollID == poll.ID)
             {
                 bVoted = true;
-                option = iVotes[vOptionID];
+                option = vote.OptionID;
 
                 break;
             }
@@ -238,11 +238,11 @@ void ListPolls(int client)
             }
         }
 
-        Format(sTitle, sizeof(sTitle), "%s%s", sTitle, iPolls[pTitle]);
+        Format(sTitle, sizeof(sTitle), "%s%s", sTitle, poll.Title);
         
         if (g_cDebug.BoolValue)
         {
-            Format(sTitle, sizeof(sTitle), "[%d] %s", iPolls[pID], sTitle);
+            Format(sTitle, sizeof(sTitle), "[%d] %s", poll.ID, sTitle);
         }
 
         menu.AddItem(sPollID, sTitle);
@@ -268,7 +268,7 @@ public int Menu_PollList(Menu menu, MenuAction action, int client, int param)
     }
 }
 
-void ListPollOptions(int client, int poll)
+void ListPollOptions(int client, int pollid)
 {
     if (g_cDeadPlayers.BoolValue && IsPlayerAlive(client))
     {
@@ -280,30 +280,30 @@ void ListPollOptions(int client, int poll)
 
     LoopPollsArray(i)
     {
-        int iPolls[ePolls];
-        g_aPolls.GetArray(i, iPolls[0]);
+        Poll poll;
+        g_aPolls.GetArray(i, poll);
 
-        if (iPolls[pID] != poll)
+        if (poll.ID != pollid)
         {
             continue;
         }
 
-        int iVotes = GetAmountOfVotes(client, iPolls[pID]);
+        int iVotes = GetAmountOfVotes(client, poll.ID);
 
         char sTitle[96];
         char sBufTitle[64];
         char sVotes[32];
 
-        if (iPolls[pVotes] > 1)
+        if (poll.Votes > 1)
         {
-            strcopy(sBufTitle, sizeof(sBufTitle), iPolls[pTitle]);
-            Format(sVotes, sizeof(sVotes), "%T", "Menu - Options Multichoice", client, iVotes, iPolls[pVotes]);
+            strcopy(sBufTitle, sizeof(sBufTitle), poll.Title);
+            Format(sVotes, sizeof(sVotes), "%T", "Menu - Options Multichoice", client, iVotes, poll.Votes);
 
             Format(sTitle, sizeof(sTitle), "%T", "Menu - Options menu multi", client, sBufTitle, sVotes);
         }
         else
         {
-            strcopy(sTitle, sizeof(sTitle), iPolls[pTitle]);
+            strcopy(sTitle, sizeof(sTitle), poll.Title);
         }
 
         menu.SetTitle(sTitle);
@@ -312,10 +312,10 @@ void ListPollOptions(int client, int poll)
 
     LoopOptionsArray(i)
     {
-        int iOptions[eOptions];
-        g_aOptions.GetArray(i, iOptions[0]);
+        Option option;
+        g_aOptions.GetArray(i, option);
 
-        if (poll == iOptions[oPoll])
+        if (pollid == option.Poll)
         {
             char sCommunity[18];
             if (!GetClientAuthId(client, AuthId_SteamID64, sCommunity, sizeof(sCommunity)))
@@ -327,10 +327,10 @@ void ListPollOptions(int client, int poll)
 
             LoopVotesArray(j)
             {
-                int iVotes[eVotes];
-                g_aVotes.GetArray(j, iVotes[0]);
+                Vote vote;
+                g_aVotes.GetArray(j, vote);
 
-                if (StrEqual(sCommunity, iVotes[vCommunity], false) && iVotes[vPollID] == iOptions[oPoll] && iVotes[vOptionID] == iOptions[oID])
+                if (StrEqual(sCommunity, vote.Community, false) && vote.PollID == option.Poll && vote.OptionID == option.ID)
                 {
                     bVoted = true;
 
@@ -339,7 +339,7 @@ void ListPollOptions(int client, int poll)
             }
 
             char sParam[24];
-            Format(sParam, sizeof(sParam), "%d.%d.%d", poll, iOptions[oID], bVoted);
+            Format(sParam, sizeof(sParam), "%d.%d.%d", pollid, option.ID, bVoted);
 
             char sOption[64], sVoted[24];
             Format(sVoted, sizeof(sVoted), "%T", "Menu - Voted", client);
@@ -349,11 +349,11 @@ void ListPollOptions(int client, int poll)
                 Format(sOption, sizeof(sOption), "[%s] ", sVoted);
             }
 
-            Format(sOption, sizeof(sOption), "%s%s", sOption, iOptions[oOption]);
+            Format(sOption, sizeof(sOption), "%s%s", sOption, option.Option);
 
             if (g_cDebug.BoolValue)
             {
-                Format(sOption, sizeof(sOption), "[%d.%d] %s", iOptions[oID], bVoted, sOption);
+                Format(sOption, sizeof(sOption), "[%d.%d] %s", option.ID, bVoted, sOption);
             }
 
             if (!bVoted || (bVoted && g_cDeleteOwnVotes.BoolValue))
@@ -388,16 +388,16 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
 
         LoopPollsArray(i)
         {
-            int iPolls[ePolls];
-            g_aPolls.GetArray(i, iPolls[0]);
+            Poll poll;
+            g_aPolls.GetArray(i, poll);
 
-            if (iPolls[pExpire] <= GetTime() || !iPolls[pStatus])
+            if (poll.Expire <= GetTime() || !poll.Status)
             {
-                ClosePoll(iPolls[pID]);
+                ClosePoll(poll.ID);
 
-                if (iPoll == iPolls[pID])
+                if (iPoll == poll.ID)
                 {
-                    CPrintToChat(client, "%T", "Chat - No longer available", client, iPolls[pTitle]);
+                    CPrintToChat(client, "%T", "Chat - No longer available", client, poll.Title);
                 }
                 
                 return;
@@ -503,12 +503,12 @@ void RemoveClientVotes(int client, int poll = -1)
 
     LoopVotesArray(i)
     {
-        int iVotes[eVotes];
-        g_aVotes.GetArray(i, iVotes[0]);
+        Vote vote;
+        g_aVotes.GetArray(i, vote);
 
-        if (StrEqual(sCommunity, iVotes[vCommunity], false))
+        if (StrEqual(sCommunity, vote.Community, false))
         {
-            if (poll == -1 || iVotes[vPollID] == poll)
+            if (poll == -1 || vote.PollID == poll)
             {
                 g_aVotes.Erase(i);
             }
@@ -523,16 +523,16 @@ int GetActivePolls()
 
     LoopPollsArray(i)
     {
-        int iPolls[ePolls];
-        g_aPolls.GetArray(i, iPolls[0]);
+        Poll poll;
+        g_aPolls.GetArray(i, poll);
 
-        if (iPolls[pExpire] <= GetTime() || !iPolls[pStatus])
+        if (poll.Expire <= GetTime() || !poll.Status)
         {
-            ClosePoll(iPolls[pID]);
+            ClosePoll(poll.ID);
             continue;
         }
 
-        if (iPolls[pStatus])
+        if (poll.Status)
         {
             iVotes++;
         }
@@ -547,18 +547,18 @@ ArrayList GetActivePollsArray()
 
     LoopPollsArray(i)
     {
-        int iPolls[ePolls];
-        g_aPolls.GetArray(i, iPolls[0]);
+        Poll poll;
+        g_aPolls.GetArray(i, poll);
 
-        if (iPolls[pExpire] <= GetTime() || !iPolls[pStatus])
+        if (poll.Expire <= GetTime() || !poll.Status)
         {
-            ClosePoll(iPolls[pID]);
+            ClosePoll(poll.ID);
             continue;
         }
 
-        if (iPolls[pStatus])
+        if (poll.Status)
         {
-            aPolls.Push(iPolls[pID]);
+            aPolls.Push(poll.ID);
         }
     }
 
@@ -577,10 +577,10 @@ int GetUnvotedVotes(int client, int active)
 
     LoopVotesArray(j)
     {
-        int iVotes[eVotes];
-        g_aVotes.GetArray(j, iVotes[0]);
+        Vote vote;
+        g_aVotes.GetArray(j, vote);
 
-        if (StrEqual(sCommunity, iVotes[vCommunity], false) && aPolls.FindValue(iVotes[vPollID]) != -1)
+        if (StrEqual(sCommunity, vote.Community, false) && aPolls.FindValue(vote.PollID) != -1)
         {
             active--;
         }
@@ -603,10 +603,10 @@ int GetAmountOfVotes(int client, int poll)
 
     LoopVotesArray(j)
     {
-        int iVotes[eVotes];
-        g_aVotes.GetArray(j, iVotes[0]);
+        Vote vote;
+        g_aVotes.GetArray(j, vote);
 
-        if (StrEqual(sCommunity, iVotes[vCommunity], false) && iVotes[vPollID] == poll)
+        if (StrEqual(sCommunity, vote.Community, false) && vote.PollID == poll)
         {
             votes++;
         }
@@ -627,12 +627,12 @@ void DeletePlayerVote(int client, int poll, int option)
 
     LoopVotesArray(i)
     {
-        int iVotes[eVotes];
-        g_aVotes.GetArray(i, iVotes[0]);
+        Vote vote;
+        g_aVotes.GetArray(i, vote);
 
-        if (StrEqual(sCommunity, iVotes[vCommunity], false) && iVotes[vPollID] == poll && iVotes[vOptionID] == option)
+        if (StrEqual(sCommunity, vote.Community, false) && vote.PollID == poll && vote.OptionID == option)
         {
-            iVoteID = iVotes[vID];
+            iVoteID = vote.ID;
             g_aVotes.Erase(i);
         }
     }

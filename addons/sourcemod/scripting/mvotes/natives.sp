@@ -16,22 +16,22 @@ public int Native_CreatePoll(Handle plugin, int numParams)
 
 public int Native_ClosePoll(Handle plugin, int numParams)
 {
-    int poll = GetNativeCell(1);
+    int pollid = GetNativeCell(1);
 
     bool bFound = false;
 
     LoopPollsArray(i)
     {
-        int iPolls[ePolls];
-        g_aPolls.GetArray(i, iPolls[0]);
+        Poll poll;
+        g_aPolls.GetArray(i, poll);
 
-        if (iPolls[pExpire] <= GetTime())
+        if (poll.Expire <= GetTime())
         {
-            ClosePoll(iPolls[pID]);
+            ClosePoll(poll.ID);
             continue;
         }
 
-        if (iPolls[pID] == poll)
+        if (poll.ID == pollid)
         {
             bFound = true;
             break;
@@ -40,6 +40,6 @@ public int Native_ClosePoll(Handle plugin, int numParams)
 
     if (bFound)
     {
-        ClosePoll(poll);
+        ClosePoll(pollid);
     }
 }

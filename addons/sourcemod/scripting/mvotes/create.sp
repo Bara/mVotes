@@ -2,10 +2,13 @@ static bool g_bTitle[MAXPLAYERS + 1] = { false, ... };
 static bool g_bLength[MAXPLAYERS + 1] = { false, ... };
 static bool g_bOptions[MAXPLAYERS + 1] = { false, ... };
 static bool g_bVotes[MAXPLAYERS + 1] = { false, ... };
+static bool g_bKeywords[MAXPLAYERS + 1] = { false, ... };
 
-static char g_sTitle[MAXPLAYERS + 1][64];
 static int g_iLength[MAXPLAYERS + 1] = { -1, ...};
 static int g_iVotes[MAXPLAYERS + 1] = { -1, ... };
+
+static char g_sTitle[MAXPLAYERS + 1][64];
+static char g_sKeywords[MAXPLAYERS + 1][128];
 
 static ArrayList g_aCOptions[MAXPLAYERS + 1] = { null, ...};
 
@@ -98,7 +101,18 @@ void ShowCreateMenu(int client)
         menu.AddItem("votes", sBuffer);
     }
 
-    if (strlen(g_sTitle[client]) > 3 && g_iLength[client] >= g_cMinLength.IntValue && g_aCOptions[client].Length >= g_cMinOptions.IntValue && g_iVotes[client] > 0)
+    if (!StrEqual(g_sKeywords[client], ";", false) && strlen(g_sKeywords[client]) > 0)
+    {
+        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Set keywords", client);
+        menu.AddItem("keywords", sBuffer);
+    }
+    else
+    {
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T\n ", "Menu - Set keywords", client);
+        menu.AddItem("keywords", sBuffer);
+    }
+
+    if (strlen(g_sTitle[client]) > 3 && g_iLength[client] >= g_cMinLength.IntValue && g_aCOptions[client].Length >= g_cMinOptions.IntValue && g_iVotes[client] > 0 && strlen(g_sKeywords[client]) > 0)
     {
         Format(sBuffer, sizeof(sBuffer), "> %T\n ", "Menu - Create Vote", client);
         menu.AddItem("create", sBuffer);
@@ -142,7 +156,12 @@ public int Menu_CreateMenu(Menu menu, MenuAction action, int client, int param)
         else if (StrEqual(sParam, "votes", false))
         {
             g_bVotes[client] = true;
-            PrintToChat(client, "%T", "Chat - Type votes", client);
+            CPrintToChat(client, "%T", "Chat - Type votes", client);
+        }
+        else if (StrEqual(sParam, "keywords", false))
+        {
+            g_bKeywords[client] = true;
+            CPrintToChat(client, "%T", "Chat - Type keywords", client);
         }
         else if (StrEqual(sParam, "create", false))
         {
@@ -302,11 +321,60 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
                 CPrintToChat(client, "%T", "Chat - Not numeric length", client);
             }
         }
+        else if (g_bKeywords[client])
+        {
+            delete g_aKeywords;
+
+            if (strlen(message) > 0)
+            {
+                if (StrContains(message, ";", false) != -1)
+                {
+                    char sKeywords[12][24];
+                    int iSize = ExplodeString(message, ";", sKeywords, sizeof(sKeywords), sizeof(sKeywords[]));
+
+                    if (iSize > 0)
+                    {
+                        g_aKeywords = new ArrayList();
+
+                        for (int i = 0; i < iSize; i++)
+                        {
+                            if (strlen(sKeywords[i]) < 1)
+                            {
+                                continue;
+                            }
+
+                            CPrintToChat(client, "%T", "Chat - Keyword", client, sKeywords[i]);
+
+                            g_aKeywords.PushString(sKeywords[i]);
+
+                            if (g_cDebug.BoolValue)
+                            {
+                                LogMessage("[MVotes.OnClientSayCommand] Added keyword %d: %s", i+1, sKeywords[i]);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    g_aKeywords = new ArrayList();
+
+                    CPrintToChat(client, "%T", "Chat - Keyword", client, message);
+
+                    g_aKeywords.PushString(message);
+
+                    if (g_cDebug.BoolValue)
+                    {
+                        LogMessage("[MVotes.OnClientSayCommand] Added keyword: %s", message);
+                    }
+                }
+            }
+        }
 
         g_bTitle[client] = false;
         g_bLength[client] = false;
         g_bOptions[client] = false;
         g_bVotes[client] = false;
+        g_bKeywords[client] = false;
 
         ShowCreateMenu(client);
 
@@ -318,7 +386,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 
 bool CheckClientStatus(int client)
 {
-    return (g_bTitle[client] || g_bLength[client] || g_bOptions[client] || g_bVotes[client]);
+    return (g_bTitle[client] || g_bLength[client] || g_bOptions[client] || g_bVotes[client] || g_bKeywords[client]);
 }
 
 void ResetCreateVote(int client, bool message = false)
@@ -327,8 +395,10 @@ void ResetCreateVote(int client, bool message = false)
     g_bLength[client] = false;
     g_bOptions[client] = false;
     g_bVotes[client] = false;
+    g_bKeywords[client] = false;
 
     Format(g_sTitle[client], sizeof(g_sTitle[]), "");
+    Format(g_sKeywords[client], sizeof(g_sKeywords[]), "");
     g_iLength[client] = -1;
 
     delete g_aCOptions[client];

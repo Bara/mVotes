@@ -13,43 +13,42 @@ ConVar g_cMessageType = null;
 ConVar g_cAdminFlag = null;
 ConVar g_cMenuAfterVote = null;
 ConVar g_cDeleteOwnVotes = null;
-ConVar g_cKeyword = null;
+ConVar g_cKeywords = null;
+
+ArrayList g_aKeywords = null;
 
 int g_iCreateTables = -1;
 
 bool g_bLoaded = false;
 
-enum ePolls
+enum struct Poll
 {
-    pID = 0,
-    bool:pStatus,
-    pCreated,
-    pExpire,
-    pVotes,
-    String:pTitle[64]
-};
+    int ID;
+    bool Status;
+    int Created;
+    int Expire;
+    int Votes;
+    char Title[64];
+}
 
-int g_iPolls[ePolls];
 ArrayList g_aPolls = null;
 
-enum eOptions
+enum struct Option
 {
-    oID = 0,
-    oPoll,
-    String:oOption[32]
-};
+    int ID;
+    int Poll;
+    char Option[32];
+}
 
-int g_iOptions[eOptions];
 ArrayList g_aOptions = null;
 
-enum eVotes
+enum struct Vote
 {
-    vID = 0,
-    vTime,
-    vPollID,
-    vOptionID,
-    String:vCommunity[18]
-};
+    int ID;
+    int Time;
+    int PollID;
+    int OptionID;
+    char Community[18];
+}
 
-int g_iVotes[eVotes];
 ArrayList g_aVotes = null;

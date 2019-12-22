@@ -37,6 +37,12 @@
         "de"        "Stimmen/Spieler festlegen"
     }
 
+    "Menu - Set keywords"
+    {
+        "en"        "Set keywords"
+        "de"        "Schlüsselwörter festlegen"
+    }
+
     "Menu - Current polls"
     {
         "en"        "Current polls"
@@ -85,7 +91,13 @@
     "Chat - Type votes"
     {
         "en"        "Type the amount of votes per player (default 1) for one vote in chat or abort with '!abort'. It can't be higher as the amount of options."
-        "de"        "Gib die Anzahl an Abstimmungen pro Spieler (Standard 1) für die Umfrage im Chat an oder breche mit '!abort'. Es kann nicht höher wie die Anzahl der Optionen sein."
+        "de"        "Gib die Anzahl an Abstimmungen pro Spieler (Standard 1) für die Umfrage im Chat an oder breche mit '!abort' ab. Es kann nicht höher wie die Anzahl der Optionen sein."
+    }
+
+    "Chat - Type keywords"
+    {
+        "en"        "Type your keywords (\";\" for no keywords, so all polls are displayed) in chat or abort with '!abort'."
+        "de"        "Gib deine Schlüsselwörter (\";\" für keine Schlüsselwörter, damit werden alle Umfragen angezeigt) im Chat ein oder brechte mit '!abort' ab."
     }
 
     "Chat - Title"
@@ -119,6 +131,13 @@
         "#format"   "{1:s}"
         "en"        "Option: {darkred}{1}"
         "de"        "Option: {darkred}{1}"
+    }
+
+    "Chat - Keyword"
+    {
+        "#format"   "{1:s}"
+        "en"        "Keyword: {darkred}{1}"
+        "de"        "Schlüsselwort: {darkred}{1}"
     }
 
     "Chat - More Options"
