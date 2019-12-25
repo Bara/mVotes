@@ -8,7 +8,7 @@
  * Return: -1 - Looks good, 0 - Invalid time/expire time, 1 - Invalid poll length (See mvotes_min_length), 2 - Invalid options (See mvotes_min_options), 3 - Invalid votes (More or equal votes per player as options given)
  *
  */
-native int MVotes_CreatePoll(int client = -1, const char[] title, int length, ArrayList options, int votes);
+native int MVotes_CreatePoll(int client = -1, const char[] title, int length, ArrayList options, int votes, ArrayList keywords);
 
 native void MVotes_ClosePoll(int pollID);
 

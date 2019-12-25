@@ -59,9 +59,8 @@ public void OnPluginStart()
     g_cAdminFlag = AutoExecConfig_CreateConVar("mvotes_admin_flags", "k", "Admin flags to get access for creating votes. (Default: k)");
     g_cMenuAfterVote = AutoExecConfig_CreateConVar("mvotes_menu_after_vote", "1", "Which menu after vote? 0 - Main Menu, 1 - Menu with the current poll", _, true, 0.0, true, 1.0);
     g_cDeleteOwnVotes = AutoExecConfig_CreateConVar("mvotes_delete_own_votes", "0", "Allow deleting own votes from a poll? It just work while the Poll is still active.", _, true, 0.0, true, 1.0);
-    g_cKeywords = AutoExecConfig_CreateConVar("mvotes_keywords", ";", "Set server keywords, if you have more servers and want polls for specific servers. Separate each keyword with ; (Default: \";\" to show all polls)");
-    AutoExecConfig_ExecuteFile();
-    AutoExecConfig_CleanFile();
+    g_cKeywords = AutoExecConfig_CreateConVar("mvotes_keywords", "", "Set your server keywords (up to 16 keywords), if you have more servers and want polls for specific servers.\nSeparate each keyword with \";\"\nPolls without an keyword will always displayed");
+    AutoExecConfig_ExecuteFile();    AutoExecConfig_CleanFile();
 
     g_cPluginTag.AddChangeHook(CVar_ChangeHook);
 
@@ -80,7 +79,7 @@ public void OnConfigsExecuted()
     g_cPluginTag.GetString(sBuffer, sizeof(sBuffer));
     CSetPrefix(sBuffer);
 
-    initSQL();
+    InitSQL();
 
     if (g_cMessageInterval.FloatValue > 0.0)
     {

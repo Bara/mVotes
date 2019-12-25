@@ -15,8 +15,6 @@ ConVar g_cMenuAfterVote = null;
 ConVar g_cDeleteOwnVotes = null;
 ConVar g_cKeywords = null;
 
-ArrayList g_aKeywords = null;
-
 int g_iCreateTables = -1;
 
 bool g_bLoaded = false;
@@ -29,6 +27,7 @@ enum struct Poll
     int Expire;
     int Votes;
     char Title[64];
+    char Keywords[128];
 }
 
 ArrayList g_aPolls = null;

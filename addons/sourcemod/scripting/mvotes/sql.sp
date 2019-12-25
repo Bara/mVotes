@@ -1,8 +1,13 @@
 static int g_iAntiSpam = -1;
 static char g_sCharset[12] = "utf8mb4";
 
-void _sqlConnect()
+void InitSQL()
 {
+    if (g_dDatabase != null)
+    {
+        return;
+    }
+
     char sEntry[32];
     g_cEntry.GetString(sEntry, sizeof(sEntry));
 
@@ -55,7 +60,7 @@ void CreateTables()
             `admin` varchar(24) NOT NULL, \
             `ip` varchar(18) NOT NULL, \
             `port` int(6) NOT NULL, \
-            `keywords` varchar(128) NOT NULL, \
+            `keywords` varchar(128) DEFAULT NULL, \
             PRIMARY KEY (`id`), \
             UNIQUE KEY (`title`, `created`) \
         ) ENGINE=InnoDB CHARSET=\"%s\"", g_sCharset);
@@ -153,6 +158,11 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
                 int iExpire = results.FetchInt(4);
                 int iVotes = results.FetchInt(5);
 
+                char sKeywords[128];
+
+                results.FetchString(6, sKeywords, sizeof(sKeywords));
+                bool bAll = StrEqual(sKeywords, ".", false);
+
                 if (iExpire < GetTime())
                 {
                     bStatus = false;
@@ -161,6 +171,17 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
 
                 if (bStatus)
                 {
+                    bool bKeywords = CompareKeywords(sKeywords);
+                    if (g_cDebug.BoolValue)
+                    {
+                        LogMessage("[MVotes.sqlLoadPolls] iPoll: %d, bAll: %d, bKeywords: %d", iPoll, bAll, bKeywords);
+                    }
+                    
+                    if (!bAll && !bKeywords)
+                    {
+                        continue;
+                    }
+
                     Poll poll;
 
                     poll.ID = iPoll;
@@ -303,30 +324,60 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
         int iExpire = dp.ReadCell();
         ArrayList aOptions = dp.ReadCell();
         int iVotes = dp.ReadCell();
+        ArrayList aKeywords = dp.ReadCell();
+        int client = dp.ReadCell();
         delete dp;
 
         int iPoll = results.InsertId;
         bool bStatus = true;
 
-        if (g_cDebug.BoolValue)
+        char sKeywords[128];
+
+        if (aKeywords != null)
         {
-            LogMessage("[MVotes.sqlInsertPoll] PollID: %d Title: %s, Created: %d, Expire: %d, Options: %d, Options.Length: %d, Votes: %d", iPoll, sTitle, iCreated, iExpire, aOptions, aOptions.Length, iVotes);
+            LoopCustomArray(i, aKeywords)
+            {
+                char sKeyword[16];
+                aKeywords.GetString(i, sKeyword, sizeof(sKeyword));
+
+                Format(sKeywords, sizeof(sKeywords), "%s%s;", sKeywords, sKeyword);
+            }
         }
 
-        Poll poll;
+        if (g_cDebug.BoolValue)
+        {
+            LogMessage("[MVotes.sqlInsertPoll] PollID: %d Title: %s, Created: %d, Expire: %d, Options: %d, Options.Length: %d, Votes: %d, Keywords: %s", iPoll, sTitle, iCreated, iExpire, aOptions, aOptions.Length, iVotes, sKeywords);
+        }
 
-        poll.ID = iPoll;
-        poll.Status = bStatus;
-        poll.Created = iCreated;
-        poll.Expire = iExpire;
-        poll.Votes = iVotes;
-        Format(poll.Title, sizeof(sTitle), sTitle);
 
-        g_aPolls.PushArray(poll);
+        bool bAll = StrEqual(sKeywords, ".", false);
+        bool bKeywords = CompareKeywords(sKeywords);
 
         if (g_cDebug.BoolValue)
         {
-            LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s, Votes: %d", poll.ID, poll.Status, poll.Created, poll.Expire, poll.Title, poll.Votes);
+            LogMessage("[MVotes.sqlInsertPoll] iPoll: %d, bAll: %d, bKeywords: %d", iPoll, bAll, bKeywords);
+        }
+        
+        bool bServer = (bAll || (!bAll && bKeywords));
+
+        if (bServer)
+        {
+            Poll poll;
+
+            poll.ID = iPoll;
+            poll.Status = bStatus;
+            poll.Created = iCreated;
+            poll.Expire = iExpire;
+            poll.Votes = iVotes;
+            Format(poll.Title, sizeof(sTitle), sTitle);
+            Format(poll.Keywords, sizeof(sKeywords), sKeywords);
+
+            g_aPolls.PushArray(poll);
+
+            if (g_cDebug.BoolValue)
+            {
+                LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s, Votes: %d", poll.ID, poll.Status, poll.Created, poll.Expire, poll.Title, poll.Votes);
+            }
         }
 
         LoopCustomArray(i, aOptions)
@@ -347,14 +398,17 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
                 LogMessage("[MVotes.sqlInsertPoll] Insert Query: %s", sQuery);
             }
 
-            DataPack dp2 = new DataPack();
-            g_dDatabase.Query(sqlInsertOptions, sQuery, dp2);
-            dp2.WriteCell(iPoll);
-            dp2.WriteString(sTitle);
-            dp2.WriteString(sOption);
+            dp = new DataPack();
+            g_dDatabase.Query(sqlInsertOptions, sQuery, dp);
+            dp.WriteCell(iPoll);
+            dp.WriteString(sTitle);
+            dp.WriteString(sOption);
+            dp.WriteCell(bServer);
+            dp.WriteCell(client);
         }
 
         delete aOptions;
+        delete aKeywords;
     }
 }
 
@@ -373,6 +427,8 @@ public void sqlInsertOptions(Database db, DBResultSet results, const char[] erro
         int iPoll = dp.ReadCell();
         dp.ReadString(sTitle, sizeof(sTitle));
         dp.ReadString(sOption, sizeof(sOption));
+        bool bServer = dp.ReadCell();
+        int client = dp.ReadCell();
         delete dp;
 
         int iOptionID = results.InsertId;
@@ -382,23 +438,31 @@ public void sqlInsertOptions(Database db, DBResultSet results, const char[] erro
             LogMessage("[MVotes.sqlLoadOptions] PollID: %d Title: %s, sOption: %s, iOption: %d", iPoll, sTitle, sOption, iOptionID);
         }
 
-        Option option;
-
-        option.ID = iOptionID;
-        option.Poll = iPoll;
-        Format(option.Option, sizeof(sOption), sOption);
-
-        g_aOptions.PushArray(option);
-
-        if (g_cDebug.BoolValue)
+        if (bServer)
         {
-            LogMessage("[MVotes.sqlLoadOptions.Cache] iOptionID: %d, iPoll: %d, sOption: %s", option.ID, option.Poll, option.Option);
-        }
+            Option option;
 
-        if (g_cMessageAll.BoolValue && (g_iAntiSpam == -1 || (g_iAntiSpam + 5 < GetTime())))
+            option.ID = iOptionID;
+            option.Poll = iPoll;
+            Format(option.Option, sizeof(sOption), sOption);
+
+            g_aOptions.PushArray(option);
+
+            if (g_cDebug.BoolValue)
+            {
+                LogMessage("[MVotes.sqlLoadOptions.Cache] iOptionID: %d, iPoll: %d, sOption: %s", option.ID, option.Poll, option.Option);
+            }
+
+            if (g_cMessageAll.BoolValue && (g_iAntiSpam == -1 || (g_iAntiSpam + 5 < GetTime())))
+            {
+                g_iAntiSpam = GetTime();
+                CPrintToChatAll("%T", "Chat - Poll Available", LANG_SERVER, sTitle);
+            }
+        }
+        else if ((!bServer && IsClientValid(client)) && (g_iAntiSpam == -1 || (g_iAntiSpam + 5 < GetTime())))
         {
             g_iAntiSpam = GetTime();
-            CPrintToChatAll("%T", "Chat - Poll Available", LANG_SERVER, sTitle);
+            CPrintToChat(client, "%T", "Chat - Poll Created", client, sTitle);
         }
     }
 }

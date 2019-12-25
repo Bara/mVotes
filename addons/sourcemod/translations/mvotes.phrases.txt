@@ -5,36 +5,42 @@
         "#format"   "{1:d}"
         "en"        "We've {darkblue}{1} {default}active votes. Type {darkblue}!votes {default}to view all available polls."
         "de"        "Wir haben aktuell {darkblue}{1} {default}aktive Umfrage(n). Gib {darkblue}!votes {default}im Chat ein um alle Umfragen zu sehen."
+        "pl"        "Mamy {darkblue}{1} {default}aktywnych głosów. Napisz {darkblue}!votes {default} aby zobaczyć listę ankiet."
     }
 
     "Menu - Create Vote"
     {
         "en"        "Create vote"
         "de"        "Umfrage erstellen"
+        "pl"        "Utwórz ankietę"
     }
 
     "Menu - Set title"
     {
         "en"        "Set title"
         "de"        "Titel festlegen"
+        "pl"        "Ustaw tytuł"
     }
 
     "Menu - Set length"
     {
         "en"        "Set length"
         "de"        "Länge festlegen"
+        "pl"        "Ustaw długość"
     }
 
     "Menu - Set options"
     {
         "en"        "Set options"
         "de"        "Optionen festlegen"
+        "pl"        "Ustaw opcje"
     }
 
     "Menu - Set votes"
     {
         "en"        "Set votes/player"
         "de"        "Stimmen/Spieler festlegen"
+        "pl"        "Ustaw liczbę głosów na gracza"
     }
 
     "Menu - Set keywords"
@@ -47,12 +53,14 @@
     {
         "en"        "Current polls"
         "de"        "Aktuelle Umfragen"
+        "pl"        "Aktywne ankiety"
     }
 
     "Menu - Voted"
     {
         "en"        "VOTED"
         "de"        "ABGESTIMMT"
+        "pl"        "ZAGŁOSOWANE"
     }
 
     "Menu - Options menu multi"
@@ -66,12 +74,14 @@
         "#format"   "{1:d},{2:d}"
         "en"        "Multichoice: {1}/{2}\n "
         "de"        "Antworten: {1}/{2}\n "
+        "pl"        "Wielokrotny wybór: {1}/{2}\n "
     }
 
     "Chat - Type title"
     {
         "en"        "Type your title (at least 2 chars) in chat or abort with '!abort'."
         "de"        "Gib deinen Titel (mindestens 2 Zeichen) im Chat ein oder breche mit '!abort' ab."
+        "pl"        "Napisz swój tytuł (przynajmniej 2 znaki) na czacie lub przerwij to komendą '!abort'."
     }
 
     "Chat - Type length"
@@ -79,6 +89,7 @@
         "#format"   "{1:d}"
         "en"        "Type your length (in minutes, at least {1} minutes) in chat or abort with '!abort'."
         "de"        "Gib eine Länge (in Minuten, mindestens {1} Minuten) im Chat ein oder breche mit '!abort' ab."
+        "pl"        "Napisz długość (w minutach, przynajmniej {1} minut) na czacie lub przerwij to komendą '!abort'."
     }
 
     "Chat - Type options"
@@ -86,18 +97,20 @@
         "#format"   "{1:d}"
         "en"        "Type your options (at least {1}) in chat or abort with '!abort'. Separate each option with ';'."
         "de"        "Gib deine Optionen (mindestens {1}) im Chat ein oder breche mit '!abort' ab. Teile jede Option mit ein ';'"
+        "pl"        "Napisz opcje (przynajmniej {1}) na czacie lub przerwij to komendą '!abort'. Oddziel każdą opcję znakiem ';'"
     }
 
     "Chat - Type votes"
     {
         "en"        "Type the amount of votes per player (default 1) for one vote in chat or abort with '!abort'. It can't be higher as the amount of options."
         "de"        "Gib die Anzahl an Abstimmungen pro Spieler (Standard 1) für die Umfrage im Chat an oder breche mit '!abort' ab. Es kann nicht höher wie die Anzahl der Optionen sein."
+        "pl"        "Napisz liczbę głosów dla każdego gracza (domyślnie 1) dla jednego głosu na czacie lub przerwij to komendą '!abort'. Nie może być więcej niż liczba opcji."
     }
 
     "Chat - Type keywords"
     {
-        "en"        "Type your keywords (\";\" for no keywords, so all polls are displayed) in chat or abort with '!abort'."
-        "de"        "Gib deine Schlüsselwörter (\";\" für keine Schlüsselwörter, damit werden alle Umfragen angezeigt) im Chat ein oder brechte mit '!abort' ab."
+        "en"        "Type your keywords (Separate each keyword with {darkblue}\";\" {default}- Type {darkblue}\".\" {default}to display this poll on all servers) in chat or abort with '!abort'."
+        "de"        "Gib deine Schlüsselwörter (Separiere jedes Schlüsselwort mit {darkblue}\";\" {default}- Gib {darkblue}\".\" {default}ein, damit die Umfrage auf allen Servern angezeigt wird) im Chat ein oder brechte mit '!abort' ab."
     }
 
     "Chat - Title"
@@ -105,6 +118,7 @@
         "#format"   "{1:s}"
         "en"        "Title: {darkred}{1}"
         "de"        "Titel: {darkred}{1}"
+        "pl"        "Tytuł: {darkred}{1}"
     }
 
     "Chat - Length"
@@ -112,18 +126,21 @@
         "#format"   "{1:d}"
         "en"        "Length: {darkred}{1}"
         "de"        "Länge: {darkred}{1}"
+        "pl"        "Długość: {darkred}{1}"
     }
 
     "Chat - Invalid length"
     {
         "en"        "Invalid length"
         "de"        "Ungültige Länge"
+        "pl"        "Nieprawidłowa długość"
     }
 
     "Chat - Not numeric length"
     {
         "en"        "Length is not numeric"
         "de"        "Länge ist keine Zahl"
+        "pl"        "Długość nie jest numeryczna"
     }
 
     "Chat - Option"
@@ -131,6 +148,7 @@
         "#format"   "{1:s}"
         "en"        "Option: {darkred}{1}"
         "de"        "Option: {darkred}{1}"
+        "pl"        "Opcje: {darkred}{1}"
     }
 
     "Chat - Keyword"
@@ -144,6 +162,7 @@
     {
         "en"        "We need more options!"
         "de"        "Wir brauchen mehr Optionen!"
+        "pl"        "Potrzebujemy więcej opcji!"
     }
 
     "Chat - Poll Available"
@@ -151,6 +170,7 @@
         "#format"   "{1:s}"
         "en"        "Poll {darkblue}{1:s} {default}is now available! Type {darkblue}!votes {default}to view all availables polls."
         "de"        "Umfrage {darkblue}{1:s} {default}ist jetzt verfügbar! Gib {darkblue}!votes {default}im Chat ein um alle Umfragen zu sehen."
+        "pl"        "Ankieta {darkblue}{1:s} {default}jest już dostepna! Wpisz {darkblue}!votes {default}aby zobaczyć listę ankiet."
     }
 
     "Chat - Voted For"
@@ -158,47 +178,75 @@
         "#format"   "{1:s},{2:s}"
         "en"        "You voted for {darkblue}{1} {default}with {darkblue}{2}{default}."
         "de"        "Sie haben bei der Umfrage {darkblue}{1} {default}mit {darkblue}{2}{default} abgestimmt."
+        "pl"        "Zagłosowałeś na {darkblue}{1} {default}z {darkblue}{2}{default}."
     }
 
     "Chat - Function Disabled"
     {
         "en"        "This function is currently not available."
         "de"        "Die Funktion ist derzeit nicht verfügbar."
+        "pl"        "Ta funkcja nie jest aktualnie dostępna."
     }
 
     "Chat - Dead Players"
     {
         "en"        "This function is just for dead players."
         "de"        "Diese Funktion ist nur für tote Spieler."
+        "pl"        "Ta funkcja jest tylko dla nieżyjących graczy."
     }
 
     "Chat - No longer available"
     {
         "en"        "Poll {darkblue}{1:s} {default}is no longer available!"
-        "deen"        "Umfrage {darkblue}{1:s} {default}ist nicht mehr verfügbar!"
+        "de"        "Umfrage {darkblue}{1:s} {default}ist nicht mehr verfügbar!"
+        "pl"        "Ankieta {darkblue}{1:s} {default}nie jest już dostępna!"
     }
 
     "Settings reset"
     {
         "en"        "Settings were reset!"
         "de"        "Einstellungen wurden zurückgesetzt!"
+        "pl"        "Ustawienia zostały zrestartowane!"
     }
 
     "Chat - Too much votes"
     {
         "en"        "You can't set more votes as available options."
         "de"        "Sie können nicht mehr Stimmen wie verfügbare Optionen haben."
+        "pl"        "Nie możesz oddać więcej głosów na tą opcję."
     }
 
     "Chat - No options"
     {
         "en"        "You can't set amount of votes when you don't have set the options."
         "de"        "Sie können keine Anzahl von Stimmen festlegen, wenn Sie keine Optionen fesetgelegt haben."
+        "pl"        "Nie możesz ustawić liczby głosów dopóki nie ustawisz opcji."
     }
 
     "Chat - Votes at least"
     {
         "en"        "You need at least 1 vote per vote, otherwise it wouldn't make."
         "de"        "Du brauchst wenigstens 1 Stimme pro Abstimmung, ansonsten macht es kein Sinn."
+        "pl"        "Potrzebujesz przynajmniej 1 głosu za głos, w przeciwnym wypadku nie miało by to sensu."
+    }
+
+    "Chat - Keyword - Too short"
+    {
+        "#format"   "{1:s}"
+        "en"        "Keyword {darkblue}\"{1}\" {default}is too short!"
+        "en"        "Schlüsselwort {darkblue}\"{1}\" {default}ist zu kurz!"
+    }
+
+    "Chat - Keywords - All servers"
+    {
+        "en"        "This poll will displayed on all servers."
+        "de"        "Diese Umfrage wird auf allen Servern angezeigt."
+    }
+
+    "Chat - Poll Created"
+    {
+        "#format"   "{1:s}"
+        "en"        "Poll {darkblue}{1:s} {default}was created!"
+        "de"        "Umfrage {darkblue}{1:s} {default}wurde erstellt!"
     }
 }

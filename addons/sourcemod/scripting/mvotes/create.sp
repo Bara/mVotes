@@ -8,9 +8,9 @@ static int g_iLength[MAXPLAYERS + 1] = { -1, ...};
 static int g_iVotes[MAXPLAYERS + 1] = { -1, ... };
 
 static char g_sTitle[MAXPLAYERS + 1][64];
-static char g_sKeywords[MAXPLAYERS + 1][128];
 
 static ArrayList g_aCOptions[MAXPLAYERS + 1] = { null, ...};
+static ArrayList g_aKeywords[MAXPLAYERS + 1] = { null, ...};
 
 public Action Command_CreateVote(int client, int args)
 {
@@ -79,7 +79,7 @@ void ShowCreateMenu(int client)
         menu.AddItem("length", sBuffer);
     }
 
-    if (g_aCOptions[client].Length >= g_cMinOptions.IntValue)
+    if (g_aCOptions[client] != null && g_aCOptions[client].Length >= g_cMinOptions.IntValue)
     {
         Format(sBuffer, sizeof(sBuffer), "[X] %T ", "Menu - Set options", client);
         menu.AddItem("options", sBuffer);
@@ -92,16 +92,16 @@ void ShowCreateMenu(int client)
 
     if (g_iVotes[client] > 0)
     {
-        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Set votes", client);
+        Format(sBuffer, sizeof(sBuffer), "[X] %T", "Menu - Set votes", client);
         menu.AddItem("votes", sBuffer);
     }
     else
     {
-        Format(sBuffer, sizeof(sBuffer), "[ ] %T\n ", "Menu - Set votes", client);
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T", "Menu - Set votes", client);
         menu.AddItem("votes", sBuffer);
     }
 
-    if (!StrEqual(g_sKeywords[client], ";", false) && strlen(g_sKeywords[client]) > 0)
+    if (g_aKeywords[client] != null)
     {
         Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Set keywords", client);
         menu.AddItem("keywords", sBuffer);
@@ -112,7 +112,7 @@ void ShowCreateMenu(int client)
         menu.AddItem("keywords", sBuffer);
     }
 
-    if (strlen(g_sTitle[client]) > 3 && g_iLength[client] >= g_cMinLength.IntValue && g_aCOptions[client].Length >= g_cMinOptions.IntValue && g_iVotes[client] > 0 && strlen(g_sKeywords[client]) > 0)
+    if (strlen(g_sTitle[client]) > 3 && g_iLength[client] >= g_cMinLength.IntValue && g_aCOptions[client].Length >= g_cMinOptions.IntValue && g_iVotes[client] > 0 && g_aKeywords[client] != null)
     {
         Format(sBuffer, sizeof(sBuffer), "> %T\n ", "Menu - Create Vote", client);
         menu.AddItem("create", sBuffer);
@@ -165,7 +165,16 @@ public int Menu_CreateMenu(Menu menu, MenuAction action, int client, int param)
         }
         else if (StrEqual(sParam, "create", false))
         {
-            int reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client]);
+            int reason = -1;
+
+            if (g_aKeywords[client].Length > 0)
+            {
+                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], g_aKeywords[client]);
+            }
+            else
+            {
+                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], null);
+            }
 
             DataPack pack = new DataPack();
             pack.WriteCell(GetClientUserId(client));
@@ -323,44 +332,61 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
         }
         else if (g_bKeywords[client])
         {
-            delete g_aKeywords;
-
             if (strlen(message) > 0)
             {
-                if (StrContains(message, ";", false) != -1)
+                g_aKeywords[client] = new ArrayList();
+
+                int iContains = StrContains(message, ";", false);
+                if (iContains != -1 || strlen(message) > 2)
                 {
                     char sKeywords[12][24];
-                    int iSize = ExplodeString(message, ";", sKeywords, sizeof(sKeywords), sizeof(sKeywords[]));
+                    int iSize = -1;
+
+                    if (iContains > -1)
+                    {
+                        iSize = ExplodeString(message, ";", sKeywords, sizeof(sKeywords), sizeof(sKeywords[]));
+                    }
 
                     if (iSize > 0)
                     {
-                        g_aKeywords = new ArrayList();
-
                         for (int i = 0; i < iSize; i++)
                         {
                             if (strlen(sKeywords[i]) < 1)
                             {
+                                CPrintToChat(client, "%T", "Chat - Keyword - Too short", client, sKeywords[i]);
                                 continue;
                             }
 
                             CPrintToChat(client, "%T", "Chat - Keyword", client, sKeywords[i]);
 
-                            g_aKeywords.PushString(sKeywords[i]);
+                            g_aKeywords[client].PushString(sKeywords[i]);
 
                             if (g_cDebug.BoolValue)
                             {
-                                LogMessage("[MVotes.OnClientSayCommand] Added keyword %d: %s", i+1, sKeywords[i]);
+                                LogMessage("[MVotes.OnClientSayCommand] Added keyword %d: %s", i + 1, sKeywords[i]);
                             }
+                        }
+
+                        if (g_aKeywords[client].Length == 0)
+                        {
+                            CPrintToChat(client, "%T", "Chat - Keywords - All servers", client, message);
+                        }
+                    }
+                    else
+                    {
+                        CPrintToChat(client, "%T", "Chat - Keyword", client, message);
+
+                        g_aKeywords[client].PushString(message);
+
+                        if (g_cDebug.BoolValue)
+                        {
+                            LogMessage("[MVotes.OnClientSayCommand] Added keyword: %s", message);
                         }
                     }
                 }
-                else
+                else if (StrEqual(message, ".", false))
                 {
-                    g_aKeywords = new ArrayList();
-
-                    CPrintToChat(client, "%T", "Chat - Keyword", client, message);
-
-                    g_aKeywords.PushString(message);
+                    CPrintToChat(client, "%T", "Chat - Keywords - All servers", client, message);
 
                     if (g_cDebug.BoolValue)
                     {
@@ -398,10 +424,12 @@ void ResetCreateVote(int client, bool message = false)
     g_bKeywords[client] = false;
 
     Format(g_sTitle[client], sizeof(g_sTitle[]), "");
-    Format(g_sKeywords[client], sizeof(g_sKeywords[]), "");
+    
     g_iLength[client] = -1;
+    g_iVotes[client] = -1;
 
     delete g_aCOptions[client];
+    delete g_aKeywords[client];
 
     if (!IsFakeClient(client) && !IsClientSourceTV(client) && g_cDebug.BoolValue)
     {

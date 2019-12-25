@@ -1,14 +1,6 @@
 static int g_iTime = -1;
 static int g_iExpire = -1;
 
-stock void initSQL()
-{
-    if (g_dDatabase == null)
-    {
-        _sqlConnect();
-    }
-}
-
 stock void LoadPolls()
 {
     delete g_aPolls;
@@ -20,7 +12,7 @@ stock void LoadPolls()
     g_aVotes = new ArrayList(sizeof(Vote));
 
     char sQuery[256];
-    g_dDatabase.Format(sQuery, sizeof(sQuery), "SELECT `id`, `status`, `title`, `created`, `expire`, `votes` FROM `mvotes_polls` WHERE `status` = '1' ORDER BY `id` ASC");
+    g_dDatabase.Format(sQuery, sizeof(sQuery), "SELECT `id`, `status`, `title`, `created`, `expire`, `votes`, `keywords` FROM `mvotes_polls` WHERE `status` = '1' ORDER BY `id` ASC");
 
     if (g_cDebug.BoolValue)
     {
@@ -56,7 +48,7 @@ stock bool IsClientValid(int client)
     return false;
 }
 
-stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList options, int votes)
+stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList options, int votes, ArrayList keywords)
 {
     if (g_cDebug.BoolValue)
     {
@@ -129,8 +121,25 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     _iIP[3] = iIP & 0x000000FF;
     Format(sIP, sizeof(sIP), "%d.%d.%d.%d", _iIP[0], _iIP[1], _iIP[2], _iIP[3]);
 
+    char sKeywords[128];
+
+    if (keywords != null)
+    {
+        LoopCustomArray(i, keywords)
+        {
+            char sKeyword[16];
+            keywords.GetString(i, sKeyword, sizeof(sKeyword));
+
+            Format(sKeywords, sizeof(sKeywords), "%s%s;", sKeywords, sKeyword);
+        }
+    }
+    else
+    {
+        Format(sKeywords, sizeof(sKeywords), ".");
+    }
+
     char sQuery[1024];
-    Format(sQuery, sizeof(sQuery), "INSERT INTO `mvotes_polls` (`status`, `title`, `created`, `expire`, `votes`, `admin`, `ip`, `port`) VALUES ('1', \"%s\", '%d', '%d', '%d', \"%s\", \"%s\", '%d');", title, g_iTime, g_iExpire, votes, sAdmin, sIP, iPort);
+    Format(sQuery, sizeof(sQuery), "INSERT INTO `mvotes_polls` (`status`, `title`, `created`, `expire`, `votes`, `admin`, `ip`, `port`, `keywords`) VALUES ('1', \"%s\", '%d', '%d', '%d', \"%s\", \"%s\", '%d', \"%s\");", title, g_iTime, g_iExpire, votes, sAdmin, sIP, iPort, sKeywords);
 
     if (g_cDebug.BoolValue)
     {
@@ -144,6 +153,8 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     dp.WriteCell(g_iExpire);
     dp.WriteCell(options);
     dp.WriteCell(votes);
+    dp.WriteCell(keywords);
+    dp.WriteCell(client);
 
     return -1;
 }
@@ -649,4 +660,57 @@ void DeletePlayerVote(int client, int poll, int option)
     pack.WriteCell(GetClientUserId(client));
     pack.WriteCell(poll);
     g_dDatabase.Query(sqlDeletePlayerVote, sQuery, pack);
+}
+
+bool CompareKeywords(const char[] keywords)
+{
+    if (g_cDebug.BoolValue)
+    {
+        LogMessage("[MVotes.CompareKeywords] keywords: %s", keywords);
+    }
+
+    if (strlen(keywords) < 2)
+    {
+        return true;
+    }
+
+    char sKeywords[128];
+    g_cKeywords.GetString(sKeywords, sizeof(sKeywords));
+
+    if (g_cDebug.BoolValue)
+    {
+        LogMessage("[MVotes.CompareKeywords] sKeywords: %s", sKeywords);
+    }
+
+    // S = Server, C = Convar
+    char sKeysS[16][16], sKeysC[16][16];
+
+    // ExplodeString(sBuffer, ".", sIDs, sizeof(sIDs), sizeof(sIDs[]));
+    int iKeysS = ExplodeString(keywords, ";", sKeysS, sizeof(sKeysS), sizeof(sKeysS[]));
+    int iKeysC = ExplodeString(sKeywords, ";", sKeysC, sizeof(sKeysC), sizeof(sKeysC[]));
+
+    for (int i = 0; i < iKeysS; i++)
+    {
+        for (int j = 0; j < iKeysC; j++)
+        {
+            if (strlen(sKeysS[i]) == 0)
+            {
+                continue;
+            }
+            
+            bool bEqual = StrEqual(sKeysS[i], sKeysC[j]);
+
+            if (g_cDebug.BoolValue)
+            {
+                LogMessage("[MVotes.CompareKeywords] sKeysS: %s, sKeysC: %s, bEqual: %d", sKeysS[i], sKeysC[j], bEqual);
+            }
+
+            if (bEqual)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
