@@ -4,7 +4,14 @@ Polls and Options are cached in an array to increase performance and reduce mysq
 ## ToDo
  - Natives:
    - Extend polls
- - Translations
+ - Server Keywords
+ - Close polls
+
+## Which features will not added (except anyone do it)
+ - Change of title/options
+   - I want to prevent faked results
+ - Reactive of expired polls
+   - Just create a new one
 
 ## Known issues
  - It's currently a alpha version, bugs are welcome
