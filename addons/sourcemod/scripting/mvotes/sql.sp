@@ -30,10 +30,10 @@ public void sqlConnect(Database db, const char[] error, any data)
         LogMessage("[MVotes.sqlConnect] Connection was successful!");
     }
 
-    if (!g_dDatabase.SetCharset("utf8mb4"))
+    if (!g_dDatabase.SetCharset(g_sCharset))
     {
-        g_dDatabase.SetCharset("utf8");
         Format(g_sCharset, sizeof(g_sCharset), "utf8");
+        g_dDatabase.SetCharset(g_sCharset);
     }
 
     CreateTables();
