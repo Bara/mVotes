@@ -1,14 +1,14 @@
 # mVotes
 This plugin is a standalone polls plugin. Admins with the vote flag can create, extend and close polls with a pretty easy to use menu. It's also possible to give multiple votes on one poll. All data and results are saved in a mysql database. Active polls, options and votes are cached as enum struct in a arraylist to increase the performance without many mysql queries.
 
-## ToDo
- - Currently nothing
-
 ## Which features will not added (except anyone do it)
  - Change of title/options
-   - I want to prevent faked results
- - Reactive of expired polls
-   - Just create a new one
+   - I want try to prevent that on the legal way, otherwise it would fake the results
+ - Renewal of expired polls
+   - Expired or closed polls are done and shouldn't be reopened
+
+## ToDo
+ - Currently nothing, open an issue if you've a idea
 
 ## Known issues
- - Nothing yet
+ - Nothing yet, open an issue if you found something
