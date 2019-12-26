@@ -62,6 +62,12 @@
         "de"        "Welche Umfrage soll verlängert werden?"
     }
 
+    "Menu - Close polls"
+    {
+        "en"        "Which poll you want to close?"
+        "de"        "Welche Umfrage möchtest du schließen?"
+    }
+
     "Menu - Voted"
     {
         "en"        "VOTED"
@@ -274,5 +280,12 @@
     {
         "en"        "Title is too short. At least 4 chars"
         "de"        "Title is zu kurz. Mindestens 4 Zeichen"
+    }
+
+    "Chat - Poll closed"
+    {
+        "#format"   "{1:s}"
+        "en"        "Poll {darkblue}{1:s} {default}was closed!"
+        "de"        "Umfrage {darkblue}{1:s} {default}wurde geschlossen!"
     }
 }

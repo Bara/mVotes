@@ -25,17 +25,17 @@ stock void LoadPolls()
     g_dDatabase.Query(sqlLoadPolls, sQuery);
 }
 
-stock void ClosePoll(int poll)
+stock void ClosePoll(int pollid)
 {
     char sQuery[256];
-    Format(sQuery, sizeof(sQuery), "UPDATE `mvotes_polls` SET `status` = '0' WHERE id = '%d';", poll);
+    Format(sQuery, sizeof(sQuery), "UPDATE `mvotes_polls` SET `status` = '0' WHERE id = '%d';", pollid);
 
     if (g_cDebug.BoolValue)
     {
         LogMessage("[MVotes.ClosePoll] Update Query: %s", sQuery);
     }
 
-    g_dDatabase.Query(sqlClosePoll, sQuery, poll);
+    g_dDatabase.Query(sqlClosePoll, sQuery, pollid);
 }
 
 stock bool IsClientValid(int client)
@@ -393,12 +393,9 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
         Poll poll;
         g_aPolls.GetArray(GetPollIndex(iPoll), poll);
 
-        if (!IsPollActive(poll.ID))
+        if (!IsPollActive(iPoll))
         {
-            if (iPoll == poll.ID)
-            {
-                CPrintToChat(client, "%T", "Chat - No longer available", client, poll.Title);
-            }
+            CPrintToChat(client, "%T", "Chat - No longer available", client, poll.Title);
             
             return;
         }
@@ -869,4 +866,85 @@ int GetPollIndex(int pollid)
     }
 
     return -1;
+}
+
+void ClosePollList(int client)
+{
+    if (!g_bLoaded)
+    {
+        CReplyToCommand(client, "%T", "Chat - Function Disabled", client);
+        return;
+    }
+
+    if (CheckClientStatus(client))
+    {
+        CPrintToChat(client, "%T", "Chat - Running process", client, "Create Vote");
+        return;
+    }
+
+    char sBuffer[42];
+    Format(sBuffer, sizeof(sBuffer), "%T", "Menu - Close polls", client);
+
+    Menu menu = new Menu(Menu_ClosePollList);
+    menu.SetTitle(sBuffer);
+
+    LoopPollsArray(i)
+    {
+        Poll poll;
+        g_aPolls.GetArray(i, poll);
+
+        if (!IsPollActive(poll.ID))
+        {
+            continue;
+        }
+
+        char sTitle[64];
+        Format(sTitle, sizeof(sTitle), "%s", poll.Title);
+        
+        if (g_cDebug.BoolValue)
+        {
+            Format(sTitle, sizeof(sTitle), "[%d] %s", poll.ID, sTitle);
+        }
+
+        char sPollID[12];
+        IntToString(poll.ID, sPollID, sizeof(sPollID));
+        menu.AddItem(sPollID, sTitle);
+    }
+
+    menu.ExitButton = true;
+    menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int Menu_ClosePollList(Menu menu, MenuAction action, int client, int param)
+{
+    if (action == MenuAction_Select)
+    {
+        if (CheckClientStatus(client) || IsClientInExtend(client))
+        {
+            CPrintToChat(client, "%T", "Chat - Running process", client, "Create or Extend Vote");
+            return;
+        }
+
+        char sBuffer[12];
+        menu.GetItem(param, sBuffer, sizeof(sBuffer));
+        int iPoll = StringToInt(sBuffer);
+
+        Poll poll;
+        g_aPolls.GetArray(GetPollIndex(iPoll), poll);
+
+        if (!IsPollActive(iPoll))
+        {
+            CPrintToChat(client, "%T", "Chat - No longer available", client, poll.Title);
+            
+            return;
+        }
+
+        CPrintToChat(client, "%T", "Chat - Poll closed", client, poll.Title);
+
+        ClosePoll(iPoll);
+    }
+    else if (action == MenuAction_End)
+    {
+        delete menu;
+    }
 }

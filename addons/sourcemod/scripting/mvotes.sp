@@ -68,6 +68,7 @@ public void OnPluginStart()
     RegConsoleCmd("sm_votes", Command_Votes);
     RegConsoleCmd("sm_createvote", Command_CreateVote);
     RegConsoleCmd("sm_extendvote", Command_ExtendVote);
+    RegConsoleCmd("sm_closevote", Command_CloseVote);
 
     HookEvent("player_death", Event_PlayerDeathPost, EventHookMode_Post);
 
@@ -138,6 +139,27 @@ public Action Command_ExtendVote(int client, int args)
     }
 
     ExtendPollList(client);
+
+    return Plugin_Continue;
+}
+
+public Action Command_CloseVote(int client, int args)
+{
+    if (!IsClientValid(client))
+    {
+        return Plugin_Handled;
+    }
+
+    char sFlags[24];
+    g_cAdminFlag.GetString(sFlags, sizeof(sFlags));
+    
+    int iFlags = ReadFlagString(sFlags);
+    if (!CheckCommandAccess(client, "sm_closevote", iFlags, true))
+    {
+        return Plugin_Handled;
+    }
+
+    ClosePollList(client);
 
     return Plugin_Continue;
 }
