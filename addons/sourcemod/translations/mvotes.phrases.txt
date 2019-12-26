@@ -64,6 +64,13 @@
         "pl"        "Którą ankietę przedłużyć?"
     }
 
+    "Menu - Close polls"
+    {
+        "en"        "Which poll you want to close?"
+        "de"        "Welche Umfrage möchtest du schließen?"
+        "pl"        "Którą ankietę chcesz zamknąć?"
+    }
+
     "Menu - Voted"
     {
         "en"        "VOTED"
@@ -284,5 +291,13 @@
         "en"        "Title is too short. At least 4 chars"
         "de"        "Title is zu kurz. Mindestens 4 Zeichen"
         "pl"        "Tytuł jest za krótki. Musi mieć przynajmniej 4 znaki"
+    }
+    
+    "Chat - Poll closed"
+    {
+        "#format"   "{1:s}"
+        "en"        "Poll {darkblue}{1:s} {default}was closed!"
+        "de"        "Umfrage {darkblue}{1:s} {default}wurde geschlossen!"
+        "pl"        "Ankieta {darkblue}{1:s} {default}została zamknięta!"
     }
 }
