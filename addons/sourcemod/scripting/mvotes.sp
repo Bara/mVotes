@@ -52,7 +52,7 @@ public void OnPluginStart()
     AutoExecConfig_SetCreateDirectory(true);
     AutoExecConfig_SetCreateFile(true);
     AutoExecConfig_SetFile("plugin.mvotes");
-    g_cDebug = AutoExecConfig_CreateConVar("mvotes_debug_mode", "0", "Enable or disable debug debug mode", _, true, 0.0, true, 1.0);
+    g_cDebug = AutoExecConfig_CreateConVar("mvotes_debug_mode", "0", "Enable or disable debug mode", _, true, 0.0, true, 1.0);
     g_cEntry = AutoExecConfig_CreateConVar("mvotes_database_entry", "mvotes", "Name for the database entry in your databases.cfg");
     g_cMinOptions = AutoExecConfig_CreateConVar("mvotes_min_options", "2", "Required options for a vote", _, true, 2.0);
     g_cMinLength = AutoExecConfig_CreateConVar("mvotes_min_length", "1", "Minimum length (length in minutes) otherwise Vote start will failed", _, true, 1.0);
@@ -66,7 +66,8 @@ public void OnPluginStart()
     g_cMenuAfterVote = AutoExecConfig_CreateConVar("mvotes_menu_after_vote", "1", "Which menu after vote? 0 - Main Menu, 1 - Menu with the current poll", _, true, 0.0, true, 1.0);
     g_cDeleteOwnVotes = AutoExecConfig_CreateConVar("mvotes_delete_own_votes", "0", "Allow deleting own votes from a poll? It just work while the Poll is still active.", _, true, 0.0, true, 1.0);
     g_cKeywords = AutoExecConfig_CreateConVar("mvotes_keywords", "", "Set your server keywords (up to 16 keywords), if you have more servers and want polls for specific servers.\nSeparate each keyword with \";\"\nPolls without an keyword will always displayed");
-    AutoExecConfig_ExecuteFile();    AutoExecConfig_CleanFile();
+    AutoExecConfig_ExecuteFile();
+    AutoExecConfig_CleanFile();
 
     g_cPluginTag.AddChangeHook(CVar_ChangeHook);
 
