@@ -56,6 +56,12 @@
         "pl"        "Aktywne ankiety"
     }
 
+    "Menu - Extend polls"
+    {
+        "en"        "Which poll to extend?"
+        "de"        "Welche Umfrage soll verlängert werden?"
+    }
+
     "Menu - Voted"
     {
         "en"        "VOTED"
@@ -79,9 +85,9 @@
 
     "Chat - Type title"
     {
-        "en"        "Type your title (at least 2 chars) in chat or abort with '!abort'."
-        "de"        "Gib deinen Titel (mindestens 2 Zeichen) im Chat ein oder breche mit '!abort' ab."
-        "pl"        "Napisz swój tytuł (przynajmniej 2 znaki) na czacie lub przerwij to komendą '!abort'."
+        "en"        "Type your title (at least 4 chars) in chat or abort with '!abort'."
+        "de"        "Gib deinen Titel (mindestens 4 Zeichen) im Chat ein oder breche mit '!abort' ab."
+        "pl"        "Napisz swój tytuł (przynajmniej 4 znaki) na czacie lub przerwij to komendą '!abort'."
     }
 
     "Chat - Type length"
@@ -234,7 +240,7 @@
     {
         "#format"   "{1:s}"
         "en"        "Keyword {darkblue}\"{1}\" {default}is too short!"
-        "en"        "Schlüsselwort {darkblue}\"{1}\" {default}ist zu kurz!"
+        "de"        "Schlüsselwort {darkblue}\"{1}\" {default}ist zu kurz!"
     }
 
     "Chat - Keywords - All servers"
@@ -248,5 +254,25 @@
         "#format"   "{1:s}"
         "en"        "Poll {darkblue}{1:s} {default}was created!"
         "de"        "Umfrage {darkblue}{1:s} {default}wurde erstellt!"
+    }
+
+    "Chat - Running process"
+    {
+        "#format"   "{1:s}"
+        "en"        "Another process is already running. ({1})"
+        "de"        "Es läuft bereits ein anderer Prozess. ({1})"
+    }
+
+    "Chat - Poll extended"
+    {
+        "#format"   "{1:s},{2:d}"
+        "en"        "Poll {darkblue}{1:s} {default}was extended by {darkblue}{2} minutes{default}!"
+        "de"        "Umfrage {darkblue}{1:s} {default}wurde um {darkblue}{2} Minuten verlängert{default}!"
+    }
+
+    "Chat - Title too short"
+    {
+        "en"        "Title is too short. At least 4 chars"
+        "de"        "Title is zu kurz. Mindestens 4 Zeichen"
     }
 }

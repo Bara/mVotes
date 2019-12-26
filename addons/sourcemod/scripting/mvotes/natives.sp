@@ -21,6 +21,15 @@ public int Native_CreatePoll(Handle plugin, int numParams)
     return CreatePoll(client, sTitle, iLength, aOptions, iVotes, aKeywords);
 }
 
+public int Native_ExtendPoll(Handle plugin, int numParams)
+{
+    int client = GetNativeCell(1);
+    int pollid = GetNativeCell(2);
+    int length = GetNativeCell(3);
+
+    return ExtendPoll(client, pollid, length);
+}
+
 public int Native_ClosePoll(Handle plugin, int numParams)
 {
     int pollid = GetNativeCell(1);
@@ -32,9 +41,8 @@ public int Native_ClosePoll(Handle plugin, int numParams)
         Poll poll;
         g_aPolls.GetArray(i, poll);
 
-        if (poll.Expire <= GetTime())
+        if (!IsPollActive(poll.ID))
         {
-            ClosePoll(poll.ID);
             continue;
         }
 

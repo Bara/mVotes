@@ -25,6 +25,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     g_bLoaded = false;
 
     CreateNative("MVotes_CreatePoll", Native_CreatePoll);
+    CreateNative("MVotes_ExtendPoll", Native_ExtendPoll);
     CreateNative("MVotes_ClosePoll", Native_ClosePoll);
 
     RegPluginLibrary("mvotes");
@@ -66,6 +67,7 @@ public void OnPluginStart()
 
     RegConsoleCmd("sm_votes", Command_Votes);
     RegConsoleCmd("sm_createvote", Command_CreateVote);
+    RegConsoleCmd("sm_extendvote", Command_ExtendVote);
 
     HookEvent("player_death", Event_PlayerDeathPost, EventHookMode_Post);
 
@@ -104,6 +106,7 @@ public void OnClientDisconnect(int client)
 {
     RemoveClientVotes(client);
     ResetCreateVote(client);
+    ResetExtendVote(client);
 }
 
 public Action Command_Votes(int client, int args)
@@ -114,6 +117,27 @@ public Action Command_Votes(int client, int args)
     }
 
     ListPolls(client);
+
+    return Plugin_Continue;
+}
+
+public Action Command_ExtendVote(int client, int args)
+{
+    if (!IsClientValid(client))
+    {
+        return Plugin_Handled;
+    }
+
+    char sFlags[24];
+    g_cAdminFlag.GetString(sFlags, sizeof(sFlags));
+    
+    int iFlags = ReadFlagString(sFlags);
+    if (!CheckCommandAccess(client, "sm_extendvote", iFlags, true))
+    {
+        return Plugin_Handled;
+    }
+
+    ExtendPollList(client);
 
     return Plugin_Continue;
 }

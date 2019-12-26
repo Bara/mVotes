@@ -683,3 +683,12 @@ public void sqlDeletePlayerVote(Database db, DBResultSet results, const char[] e
         ListPollOptions(client, poll);
     }
 }
+
+public void sqlExtendPoll(Database db, DBResultSet results, const char[] error, any data)
+{
+    if (db == null || strlen(error) > 0)
+    {
+        SetFailState("[MVotes.sqlExtendPoll] Query failed: %s", error);
+        return;
+    }
+}

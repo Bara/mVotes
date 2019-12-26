@@ -1,6 +1,9 @@
 static int g_iTime = -1;
 static int g_iExpire = -1;
 
+static bool g_bExtend[MAXPLAYERS + 1] = { false, ... };
+static int g_iExtendID[MAXPLAYERS + 1] = { -1, ... };
+
 stock void LoadPolls()
 {
     delete g_aPolls;
@@ -186,9 +189,8 @@ void ListPolls(int client)
         Poll poll;
         g_aPolls.GetArray(i, poll);
 
-        if (poll.Expire <= GetTime() || !poll.Status)
+        if (!IsPollActive(poll.ID))
         {
-            ClosePoll(poll.ID);
             continue;
         }
 
@@ -289,37 +291,28 @@ void ListPollOptions(int client, int pollid)
 
     Menu menu = new Menu(Menu_OptionList);
 
-    LoopPollsArray(i)
+    Poll poll;
+    g_aPolls.GetArray(GetPollIndex(pollid), poll);
+
+    int iVotes = GetAmountOfVotes(client, poll.ID);
+
+    char sTitle[96];
+    char sBufTitle[64];
+    char sVotes[32];
+
+    if (poll.Votes > 1)
     {
-        Poll poll;
-        g_aPolls.GetArray(i, poll);
+        strcopy(sBufTitle, sizeof(sBufTitle), poll.Title);
+        Format(sVotes, sizeof(sVotes), "%T", "Menu - Options Multichoice", client, iVotes, poll.Votes);
 
-        if (poll.ID != pollid)
-        {
-            continue;
-        }
-
-        int iVotes = GetAmountOfVotes(client, poll.ID);
-
-        char sTitle[96];
-        char sBufTitle[64];
-        char sVotes[32];
-
-        if (poll.Votes > 1)
-        {
-            strcopy(sBufTitle, sizeof(sBufTitle), poll.Title);
-            Format(sVotes, sizeof(sVotes), "%T", "Menu - Options Multichoice", client, iVotes, poll.Votes);
-
-            Format(sTitle, sizeof(sTitle), "%T", "Menu - Options menu multi", client, sBufTitle, sVotes);
-        }
-        else
-        {
-            strcopy(sTitle, sizeof(sTitle), poll.Title);
-        }
-
-        menu.SetTitle(sTitle);
-        break;
+        Format(sTitle, sizeof(sTitle), "%T", "Menu - Options menu multi", client, sBufTitle, sVotes);
     }
+    else
+    {
+        strcopy(sTitle, sizeof(sTitle), poll.Title);
+    }
+
+    menu.SetTitle(sTitle);
 
     LoopOptionsArray(i)
     {
@@ -397,22 +390,17 @@ public int Menu_OptionList(Menu menu, MenuAction action, int client, int param)
         int iOption = StringToInt(sIDs[1]);
         bool bVoted = view_as<bool>(StringToInt(sIDs[2]));
 
-        LoopPollsArray(i)
+        Poll poll;
+        g_aPolls.GetArray(GetPollIndex(iPoll), poll);
+
+        if (!IsPollActive(poll.ID))
         {
-            Poll poll;
-            g_aPolls.GetArray(i, poll);
-
-            if (poll.Expire <= GetTime() || !poll.Status)
+            if (iPoll == poll.ID)
             {
-                ClosePoll(poll.ID);
-
-                if (iPoll == poll.ID)
-                {
-                    CPrintToChat(client, "%T", "Chat - No longer available", client, poll.Title);
-                }
-                
-                return;
+                CPrintToChat(client, "%T", "Chat - No longer available", client, poll.Title);
             }
+            
+            return;
         }
 
         if (g_cDebug.BoolValue)
@@ -537,9 +525,8 @@ int GetActivePolls()
         Poll poll;
         g_aPolls.GetArray(i, poll);
 
-        if (poll.Expire <= GetTime() || !poll.Status)
+        if (!IsPollActive(poll.ID))
         {
-            ClosePoll(poll.ID);
             continue;
         }
 
@@ -561,9 +548,8 @@ ArrayList GetActivePollsArray()
         Poll poll;
         g_aPolls.GetArray(i, poll);
 
-        if (poll.Expire <= GetTime() || !poll.Status)
+        if (!IsPollActive(poll.ID))
         {
-            ClosePoll(poll.ID);
             continue;
         }
 
@@ -713,4 +699,174 @@ bool CompareKeywords(const char[] keywords)
     }
 
     return false;
+}
+
+void ExtendPollList(int client)
+{
+    if (!g_bLoaded)
+    {
+        CReplyToCommand(client, "%T", "Chat - Function Disabled", client);
+        return;
+    }
+
+    if (CheckClientStatus(client))
+    {
+        CPrintToChat(client, "%T", "Chat - Running process", client, "Create Vote");
+        return;
+    }
+
+    char sBuffer[42];
+    Format(sBuffer, sizeof(sBuffer), "%T", "Menu - Extend polls", client);
+
+    Menu menu = new Menu(Menu_ExtendPollList);
+    menu.SetTitle(sBuffer);
+
+    LoopPollsArray(i)
+    {
+        Poll poll;
+        g_aPolls.GetArray(i, poll);
+
+        if (!IsPollActive(poll.ID))
+        {
+            continue;
+        }
+
+        char sTitle[64];
+        Format(sTitle, sizeof(sTitle), "%s", poll.Title);
+        
+        if (g_cDebug.BoolValue)
+        {
+            Format(sTitle, sizeof(sTitle), "[%d] %s", poll.ID, sTitle);
+        }
+
+        char sPollID[12];
+        IntToString(poll.ID, sPollID, sizeof(sPollID));
+        menu.AddItem(sPollID, sTitle);
+    }
+
+    menu.ExitButton = true;
+    menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int Menu_ExtendPollList(Menu menu, MenuAction action, int client, int param)
+{
+    if (action == MenuAction_Select)
+    {
+        if (CheckClientStatus(client))
+        {
+            CPrintToChat(client, "%T", "Chat - Running process", client, "Create Vote");
+            return;
+        }
+
+        char sBuffer[12];
+        menu.GetItem(param, sBuffer, sizeof(sBuffer));
+        int iPoll = StringToInt(sBuffer);
+
+        g_bExtend[client] = true;
+        g_iExtendID[client] = iPoll;
+
+        CPrintToChat(client, "%T", "Chat - Type length", client, g_cMinLength.IntValue);
+    }
+    else if (action == MenuAction_End)
+    {
+        delete menu;
+    }
+}
+
+bool IsClientInExtend(int client)
+{
+    return g_bExtend[client];
+}
+
+void ResetExtendVote(int client, bool full = true)
+{
+    g_bExtend[client] = false;
+    
+    if (!full)
+    {
+        g_iExtendID[client] = -1;
+    }
+}
+
+void PrepareExtend(int client, int length)
+{
+    ExtendPoll(client, g_iExtendID[client], length, true);
+}
+
+bool ExtendPoll(int client, int pollid, int length, bool message = false)
+{
+    if (IsPollActive(pollid))
+    {
+        int iIndex = GetPollIndex(pollid);
+
+        Poll poll;
+        g_aPolls.GetArray(iIndex, poll);
+
+        if (g_cDebug.BoolValue)
+        {
+            LogMessage("[MVotes.ExtendPoll] (Old) poll.ID: %d, poll.Title: %s, poll.Expire: %d, length: %d", poll.ID, poll.Title, poll.Expire, length);
+        }
+
+        poll.Expire = poll.Expire + (length * 60);
+        g_aPolls.SetArray(iIndex, poll);
+
+        if (message && IsClientValid(client))
+        {
+            CPrintToChat(client, "%T", "Chat - Poll extended", client, poll.Title, length);
+        }
+
+        if (g_cDebug.BoolValue)
+        {
+            LogMessage("[MVotes.ExtendPoll] (New) poll.ID: %d, poll.Title: %s, poll.Expire: %d, length: %d", poll.ID, poll.Title, poll.Expire, length);
+        }
+
+        char sQuery[128];
+        g_dDatabase.Format(sQuery, sizeof(sQuery), "UPDATE `mvotes_polls` SET `expire` = '%d' WHERE `id` = '%d';", poll.Expire, poll.ID);
+        g_dDatabase.Query(sqlExtendPoll, sQuery);
+
+        return true;
+    }
+
+    return false;
+}
+
+bool IsPollActive(int pollid)
+{
+    LoopPollsArray(i)
+    {
+        Poll poll;
+        g_aPolls.GetArray(i, poll);
+
+        if ((pollid == poll.ID))
+        {
+            if (poll.Expire <= GetTime() || !poll.Status)
+            {
+                ClosePoll(poll.ID);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+int GetPollIndex(int pollid)
+{
+    LoopPollsArray(i)
+    {
+        Poll poll;
+        g_aPolls.GetArray(i, poll);
+
+        if ((pollid == poll.ID))
+        {
+            return i;
+        }
+    }
+
+    return -1;
 }
