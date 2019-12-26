@@ -7,6 +7,9 @@
 #include <multicolors>
 #include <mvotes>
 
+#define PLUGIN_VERSION "1.0.0"
+#define PLUGIN_DESCRIPTION "Admins with the vote flag can create, extend and close polls with a pretty easy to use menu."
+
 #define LoopValidClients(%1) for (int %1 = 1; %1 <= MaxClients; %1++) if (IsClientValid(%1))
 
 #define LoopPollsArray(%1) for (int %1 = 0; %1 < g_aPolls.Length; %1++)
@@ -37,17 +40,19 @@ public Plugin myinfo =
 {
     name = "mVotes",
     author = "Bara",
-    description = "Voting plugin based on mysql",
-    version = "1.0.0",
+    description = PLUGIN_DESCRIPTION,
+    version = PLUGIN_VERSION,
     url = "github.com/Bara"
 };
 
 public void OnPluginStart()
 {
+    CreateConVar("mvotes_version", PLUGIN_VERSION, PLUGIN_DESCRIPTION, FCVAR_NOTIFY | FCVAR_DONTRECORD | FCVAR_REPLICATED);
+
     AutoExecConfig_SetCreateDirectory(true);
     AutoExecConfig_SetCreateFile(true);
     AutoExecConfig_SetFile("plugin.mvotes");
-    g_cDebug = AutoExecConfig_CreateConVar("mvotes_debug_mode", "1", "Enable or disable debug debug mode", _, true, 0.0, true, 1.0);
+    g_cDebug = AutoExecConfig_CreateConVar("mvotes_debug_mode", "0", "Enable or disable debug debug mode", _, true, 0.0, true, 1.0);
     g_cEntry = AutoExecConfig_CreateConVar("mvotes_database_entry", "mvotes", "Name for the database entry in your databases.cfg");
     g_cMinOptions = AutoExecConfig_CreateConVar("mvotes_min_options", "2", "Required options for a vote", _, true, 2.0);
     g_cMinLength = AutoExecConfig_CreateConVar("mvotes_min_length", "1", "Minimum length (length in minutes) otherwise Vote start will failed", _, true, 1.0);
