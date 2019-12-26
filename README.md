@@ -1,10 +1,14 @@
 # mVotes
-Polls and Options are cached in an array to increase performance and reduce mysql usage (instead of SELECT all polls+options on every menu everytime).
+This plugin is a standalone polls plugin. Admins with the vote flag can create, extend and close polls with a pretty easy to use menu. It's also possible to give multiple votes on one poll. All data and results are saved in a mysql database. Active polls, options and votes are cached as enum struct in a arraylist to increase the performance without many mysql queries.
+
+## Which features will not added (except anyone do it)
+ - Change of title/options
+   - I want try to prevent that on the legal way, otherwise it would fake the results
+ - Renewal of expired polls
+   - Expired or closed polls are done and shouldn't be reopened
 
 ## ToDo
- - Natives:
-   - Extend polls
- - Translations
+ - Currently nothing, open an issue if you've a idea
 
 ## Known issues
- - It's currently a alpha version, bugs are welcome
+ - Nothing yet, open an issue if you found something

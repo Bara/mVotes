@@ -2,12 +2,15 @@ static bool g_bTitle[MAXPLAYERS + 1] = { false, ... };
 static bool g_bLength[MAXPLAYERS + 1] = { false, ... };
 static bool g_bOptions[MAXPLAYERS + 1] = { false, ... };
 static bool g_bVotes[MAXPLAYERS + 1] = { false, ... };
+static bool g_bKeywords[MAXPLAYERS + 1] = { false, ... };
 
-static char g_sTitle[MAXPLAYERS + 1][64];
 static int g_iLength[MAXPLAYERS + 1] = { -1, ...};
 static int g_iVotes[MAXPLAYERS + 1] = { -1, ... };
 
+static char g_sTitle[MAXPLAYERS + 1][64];
+
 static ArrayList g_aCOptions[MAXPLAYERS + 1] = { null, ...};
+static ArrayList g_aKeywords[MAXPLAYERS + 1] = { null, ...};
 
 public Action Command_CreateVote(int client, int args)
 {
@@ -20,7 +23,7 @@ public Action Command_CreateVote(int client, int args)
     g_cAdminFlag.GetString(sFlags, sizeof(sFlags));
     
     int iFlags = ReadFlagString(sFlags);
-    if (!CheckCommandAccess(client, "mvotes_create", iFlags))
+    if (!CheckCommandAccess(client, "sm_createvote", iFlags, true))
     {
         return Plugin_Handled;
     }
@@ -39,6 +42,12 @@ void ShowCreateMenu(int client)
 {
     if (!IsClientValid(client))
     {
+        return;
+    }
+
+    if (IsClientInExtend(client))
+    {
+        CPrintToChat(client, "%T", "Chat - Running process", client, "Extend Vote");
         return;
     }
 
@@ -76,7 +85,7 @@ void ShowCreateMenu(int client)
         menu.AddItem("length", sBuffer);
     }
 
-    if (g_aCOptions[client].Length >= g_cMinOptions.IntValue)
+    if (g_aCOptions[client] != null && g_aCOptions[client].Length >= g_cMinOptions.IntValue)
     {
         Format(sBuffer, sizeof(sBuffer), "[X] %T ", "Menu - Set options", client);
         menu.AddItem("options", sBuffer);
@@ -89,16 +98,27 @@ void ShowCreateMenu(int client)
 
     if (g_iVotes[client] > 0)
     {
-        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Set votes", client);
+        Format(sBuffer, sizeof(sBuffer), "[X] %T", "Menu - Set votes", client);
         menu.AddItem("votes", sBuffer);
     }
     else
     {
-        Format(sBuffer, sizeof(sBuffer), "[ ] %T\n ", "Menu - Set votes", client);
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T", "Menu - Set votes", client);
         menu.AddItem("votes", sBuffer);
     }
 
-    if (strlen(g_sTitle[client]) > 3 && g_iLength[client] >= g_cMinLength.IntValue && g_aCOptions[client].Length >= g_cMinOptions.IntValue && g_iVotes[client] > 0)
+    if (g_aKeywords[client] != null)
+    {
+        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Set keywords", client);
+        menu.AddItem("keywords", sBuffer);
+    }
+    else
+    {
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T\n ", "Menu - Set keywords", client);
+        menu.AddItem("keywords", sBuffer);
+    }
+
+    if (strlen(g_sTitle[client]) > 3 && g_iLength[client] >= g_cMinLength.IntValue && g_aCOptions[client].Length >= g_cMinOptions.IntValue && g_iVotes[client] > 0 && g_aKeywords[client] != null)
     {
         Format(sBuffer, sizeof(sBuffer), "> %T\n ", "Menu - Create Vote", client);
         menu.AddItem("create", sBuffer);
@@ -116,6 +136,12 @@ public int Menu_CreateMenu(Menu menu, MenuAction action, int client, int param)
 {
     if (action == MenuAction_Select)
     {
+        if (IsClientInExtend(client))
+        {
+            CPrintToChat(client, "%T", "Chat - Running process", client, "Extend Vote");
+            return;
+        }
+
         char sParam[12];
         menu.GetItem(param, sParam, sizeof(sParam));
         
@@ -142,11 +168,25 @@ public int Menu_CreateMenu(Menu menu, MenuAction action, int client, int param)
         else if (StrEqual(sParam, "votes", false))
         {
             g_bVotes[client] = true;
-            PrintToChat(client, "%T", "Chat - Type votes", client);
+            CPrintToChat(client, "%T", "Chat - Type votes", client);
+        }
+        else if (StrEqual(sParam, "keywords", false))
+        {
+            g_bKeywords[client] = true;
+            CPrintToChat(client, "%T", "Chat - Type keywords", client);
         }
         else if (StrEqual(sParam, "create", false))
         {
-            int reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client]);
+            int reason = -1;
+
+            if (g_aKeywords[client].Length > 0)
+            {
+                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], g_aKeywords[client]);
+            }
+            else
+            {
+                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], null);
+            }
 
             DataPack pack = new DataPack();
             pack.WriteCell(GetClientUserId(client));
@@ -205,29 +245,206 @@ public Action Timer_ResetCreateVote(Handle timer, DataPack pack)
 
 public Action OnClientSayCommand(int client, const char[] command, const char[] message)
 {
-    if (IsClientValid(client) && CheckClientStatus(client))
+    if (IsClientValid(client))
     {
-        if (StrEqual(message, "!abort", false))
+        if (CheckClientStatus(client))
         {
-            ResetCreateVote(client, true);
+            if (StrEqual(message, "!abort", false))
+            {
+                ResetCreateVote(client, true);
+                return Plugin_Stop;
+            }
+
+            if (g_bTitle[client])
+            {
+                if (strlen(message) > 3)
+                {
+                    strcopy(g_sTitle[client], sizeof(g_sTitle[]), message);
+                    CPrintToChat(client, "%T", "Chat - Title", client, g_sTitle[client]);
+                }
+                else
+                {
+                    CPrintToChat(client, "%T", "Chat - Title too short", client);
+                }
+            }
+            else if (g_bLength[client])
+            {
+                if (IsNumericString(message))
+                {
+                    int iLength = StringToInt(message);
+
+                    if (iLength >= g_cMinLength.IntValue)
+                    {
+                        g_iLength[client] = iLength;
+                        CPrintToChat(client, "%T", "Chat - Length", client, g_iLength[client]);
+                    }
+                    else
+                    {
+                        CPrintToChat(client, "%T", "Chat - Invalid length", client);
+                    }
+                }
+                else
+                {
+                    CPrintToChat(client, "%T", "Chat - Not numeric length", client);
+                }
+            }
+            else if (g_bOptions[client])
+            {
+                char sOptions[12][24];
+                int iSize = ExplodeString(message, ";", sOptions, sizeof(sOptions), sizeof(sOptions[]));
+
+                if (iSize >= g_cMinOptions.IntValue)
+                {
+                    for (int i = 0; i < iSize; i++)
+                    {
+                        if (strlen(sOptions[i]) < 1)
+                        {
+                            continue;
+                        }
+
+                        CPrintToChat(client, "%T", "Chat - Option", client, sOptions[i]);
+
+                        g_aCOptions[client].PushString(sOptions[i]);
+
+                        if (g_cDebug.BoolValue)
+                        {
+                            LogMessage("[MVotes.OnClientSayCommand] Added option %d: %s", i+1, sOptions[i]);
+                        }
+                    }
+                }
+                else
+                {
+                    CPrintToChat(client, "%T", "Chat - More Options", client);
+                }
+            }
+            else if (g_bVotes[client])
+            {
+                if (IsNumericString(message))
+                {
+                    int iVotes = StringToInt(message);
+
+                    if (iVotes > 0)
+                    {
+                        if (g_aCOptions[client].Length >= g_cMinOptions.IntValue)
+                        {
+                            if (iVotes <= g_aCOptions[client].Length)
+                            {
+                                g_iVotes[client] = iVotes;
+                            }
+                            else
+                            {
+                                CPrintToChat(client, "%T", "Chat - Too much votes", client);
+                            }
+                        }
+                        else
+                        {
+                            CPrintToChat(client, "%T", "Chat - No options", client);
+                        }
+                    }
+                    else
+                    {
+                        CPrintToChat(client, "%T", "Chat - Votes at least", client);
+                    }
+                }
+                else
+                {
+                    CPrintToChat(client, "%T", "Chat - Not numeric length", client);
+                }
+            }
+            else if (g_bKeywords[client])
+            {
+                if (strlen(message) > 0)
+                {
+                    g_aKeywords[client] = new ArrayList();
+
+                    int iContains = StrContains(message, ";", false);
+                    if (iContains != -1 || strlen(message) > 2)
+                    {
+                        char sKeywords[12][24];
+                        int iSize = -1;
+
+                        if (iContains > -1)
+                        {
+                            iSize = ExplodeString(message, ";", sKeywords, sizeof(sKeywords), sizeof(sKeywords[]));
+                        }
+
+                        if (iSize > 0)
+                        {
+                            for (int i = 0; i < iSize; i++)
+                            {
+                                if (strlen(sKeywords[i]) < 1)
+                                {
+                                    CPrintToChat(client, "%T", "Chat - Keyword - Too short", client, sKeywords[i]);
+                                    continue;
+                                }
+
+                                CPrintToChat(client, "%T", "Chat - Keyword", client, sKeywords[i]);
+
+                                g_aKeywords[client].PushString(sKeywords[i]);
+
+                                if (g_cDebug.BoolValue)
+                                {
+                                    LogMessage("[MVotes.OnClientSayCommand] Added keyword %d: %s", i + 1, sKeywords[i]);
+                                }
+                            }
+
+                            if (g_aKeywords[client].Length == 0)
+                            {
+                                CPrintToChat(client, "%T", "Chat - Keywords - All servers", client, message);
+                            }
+                        }
+                        else
+                        {
+                            CPrintToChat(client, "%T", "Chat - Keyword", client, message);
+
+                            g_aKeywords[client].PushString(message);
+
+                            if (g_cDebug.BoolValue)
+                            {
+                                LogMessage("[MVotes.OnClientSayCommand] Added keyword: %s", message);
+                            }
+                        }
+                    }
+                    else if (StrEqual(message, ".", false))
+                    {
+                        CPrintToChat(client, "%T", "Chat - Keywords - All servers", client, message);
+
+                        if (g_cDebug.BoolValue)
+                        {
+                            LogMessage("[MVotes.OnClientSayCommand] Added keyword: %s", message);
+                        }
+                    }
+                }
+            }
+
+            g_bTitle[client] = false;
+            g_bLength[client] = false;
+            g_bOptions[client] = false;
+            g_bVotes[client] = false;
+            g_bKeywords[client] = false;
+
+            ShowCreateMenu(client);
+
             return Plugin_Stop;
         }
+        else if (IsClientInExtend(client))
+        {
+            if (StrEqual(message, "!abort", false))
+            {
+                ResetExtendVote(client);
+                return Plugin_Stop;
+            }
 
-        if (g_bTitle[client])
-        {
-            strcopy(g_sTitle[client], sizeof(g_sTitle[]), message);
-            CPrintToChat(client, "%T", "Chat - Title", client, g_sTitle[client]);
-        }
-        else if (g_bLength[client])
-        {
+            
             if (IsNumericString(message))
             {
                 int iLength = StringToInt(message);
 
                 if (iLength >= g_cMinLength.IntValue)
                 {
-                    g_iLength[client] = iLength;
-                    CPrintToChat(client, "%T", "Chat - Length", client, g_iLength[client]);
+                    PrepareExtend(client, iLength);
+
+                    CPrintToChat(client, "%T", "Chat - Length", client, iLength);
                 }
                 else
                 {
@@ -238,79 +455,10 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
             {
                 CPrintToChat(client, "%T", "Chat - Not numeric length", client);
             }
+            
+            ResetExtendVote(client, false);
+            return Plugin_Stop;
         }
-        else if (g_bOptions[client])
-        {
-            char sOptions[12][24];
-            int iSize = ExplodeString(message, ";", sOptions, sizeof(sOptions), sizeof(sOptions[]));
-
-            if (iSize >= g_cMinOptions.IntValue)
-            {
-                for (int i = 0; i < iSize; i++)
-                {
-                    if (strlen(sOptions[i]) < 1)
-                    {
-                        continue;
-                    }
-
-                    CPrintToChat(client, "%T", "Chat - Option", client, sOptions[i]);
-
-                    g_aCOptions[client].PushString(sOptions[i]);
-
-                    if (g_cDebug.BoolValue)
-                    {
-                        LogMessage("[MVotes.OnClientSayCommand] Added option %d: %s", i+1, sOptions[i]);
-                    }
-                }
-            }
-            else
-            {
-                CPrintToChat(client, "%T", "Chat - More Options", client);
-            }
-        }
-        else if (g_bVotes[client])
-        {
-            if (IsNumericString(message))
-            {
-                int iVotes = StringToInt(message);
-
-                if (iVotes > 0)
-                {
-                    if (g_aCOptions[client].Length >= g_cMinOptions.IntValue)
-                    {
-                        if (iVotes <= g_aCOptions[client].Length)
-                        {
-                            g_iVotes[client] = iVotes;
-                        }
-                        else
-                        {
-                            CPrintToChat(client, "%T", "Chat - Too much votes", client);
-                        }
-                    }
-                    else
-                    {
-                        CPrintToChat(client, "%T", "Chat - No options", client);
-                    }
-                }
-                else
-                {
-                    CPrintToChat(client, "%T", "Chat - Votes at least", client);
-                }
-            }
-            else
-            {
-                CPrintToChat(client, "%T", "Chat - Not numeric length", client);
-            }
-        }
-
-        g_bTitle[client] = false;
-        g_bLength[client] = false;
-        g_bOptions[client] = false;
-        g_bVotes[client] = false;
-
-        ShowCreateMenu(client);
-
-        return Plugin_Stop;
     }
 
     return Plugin_Continue;
@@ -318,7 +466,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 
 bool CheckClientStatus(int client)
 {
-    return (g_bTitle[client] || g_bLength[client] || g_bOptions[client] || g_bVotes[client]);
+    return (g_bTitle[client] || g_bLength[client] || g_bOptions[client] || g_bVotes[client] || g_bKeywords[client]);
 }
 
 void ResetCreateVote(int client, bool message = false)
@@ -327,11 +475,15 @@ void ResetCreateVote(int client, bool message = false)
     g_bLength[client] = false;
     g_bOptions[client] = false;
     g_bVotes[client] = false;
+    g_bKeywords[client] = false;
 
     Format(g_sTitle[client], sizeof(g_sTitle[]), "");
+    
     g_iLength[client] = -1;
+    g_iVotes[client] = -1;
 
     delete g_aCOptions[client];
+    delete g_aKeywords[client];
 
     if (!IsFakeClient(client) && !IsClientSourceTV(client) && g_cDebug.BoolValue)
     {

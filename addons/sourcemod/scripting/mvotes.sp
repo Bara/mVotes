@@ -25,6 +25,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     g_bLoaded = false;
 
     CreateNative("MVotes_CreatePoll", Native_CreatePoll);
+    CreateNative("MVotes_ExtendPoll", Native_ExtendPoll);
     CreateNative("MVotes_ClosePoll", Native_ClosePoll);
 
     RegPluginLibrary("mvotes");
@@ -37,7 +38,7 @@ public Plugin myinfo =
     name = "mVotes",
     author = "Bara",
     description = "Voting plugin based on mysql",
-    version = "1.0.0-beta",
+    version = "1.0.0",
     url = "github.com/Bara"
 };
 
@@ -59,13 +60,15 @@ public void OnPluginStart()
     g_cAdminFlag = AutoExecConfig_CreateConVar("mvotes_admin_flags", "k", "Admin flags to get access for creating votes. (Default: k)");
     g_cMenuAfterVote = AutoExecConfig_CreateConVar("mvotes_menu_after_vote", "1", "Which menu after vote? 0 - Main Menu, 1 - Menu with the current poll", _, true, 0.0, true, 1.0);
     g_cDeleteOwnVotes = AutoExecConfig_CreateConVar("mvotes_delete_own_votes", "0", "Allow deleting own votes from a poll? It just work while the Poll is still active.", _, true, 0.0, true, 1.0);
-    AutoExecConfig_ExecuteFile();
-    AutoExecConfig_CleanFile();
+    g_cKeywords = AutoExecConfig_CreateConVar("mvotes_keywords", "", "Set your server keywords (up to 16 keywords), if you have more servers and want polls for specific servers.\nSeparate each keyword with \";\"\nPolls without an keyword will always displayed");
+    AutoExecConfig_ExecuteFile();    AutoExecConfig_CleanFile();
 
     g_cPluginTag.AddChangeHook(CVar_ChangeHook);
 
     RegConsoleCmd("sm_votes", Command_Votes);
     RegConsoleCmd("sm_createvote", Command_CreateVote);
+    RegConsoleCmd("sm_extendvote", Command_ExtendVote);
+    RegConsoleCmd("sm_closevote", Command_CloseVote);
 
     HookEvent("player_death", Event_PlayerDeathPost, EventHookMode_Post);
 
@@ -79,7 +82,7 @@ public void OnConfigsExecuted()
     g_cPluginTag.GetString(sBuffer, sizeof(sBuffer));
     CSetPrefix(sBuffer);
 
-    initSQL();
+    InitSQL();
 
     if (g_cMessageInterval.FloatValue > 0.0)
     {
@@ -104,6 +107,7 @@ public void OnClientDisconnect(int client)
 {
     RemoveClientVotes(client);
     ResetCreateVote(client);
+    ResetExtendVote(client);
 }
 
 public Action Command_Votes(int client, int args)
@@ -114,6 +118,48 @@ public Action Command_Votes(int client, int args)
     }
 
     ListPolls(client);
+
+    return Plugin_Continue;
+}
+
+public Action Command_ExtendVote(int client, int args)
+{
+    if (!IsClientValid(client))
+    {
+        return Plugin_Handled;
+    }
+
+    char sFlags[24];
+    g_cAdminFlag.GetString(sFlags, sizeof(sFlags));
+    
+    int iFlags = ReadFlagString(sFlags);
+    if (!CheckCommandAccess(client, "sm_extendvote", iFlags, true))
+    {
+        return Plugin_Handled;
+    }
+
+    ExtendPollList(client);
+
+    return Plugin_Continue;
+}
+
+public Action Command_CloseVote(int client, int args)
+{
+    if (!IsClientValid(client))
+    {
+        return Plugin_Handled;
+    }
+
+    char sFlags[24];
+    g_cAdminFlag.GetString(sFlags, sizeof(sFlags));
+    
+    int iFlags = ReadFlagString(sFlags);
+    if (!CheckCommandAccess(client, "sm_closevote", iFlags, true))
+    {
+        return Plugin_Handled;
+    }
+
+    ClosePollList(client);
 
     return Plugin_Continue;
 }

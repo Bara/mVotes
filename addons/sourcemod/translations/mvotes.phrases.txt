@@ -43,11 +43,38 @@
         "pl"        "Ustaw liczbę głosów na gracza"
     }
 
+    "Menu - Set keywords"
+    {
+        "en"        "Set keywords"
+        "de"        "Schlüsselwörter festlegen"
+        "pl"        "Ustaw słowa kluczowe"
+    }
+
     "Menu - Current polls"
     {
         "en"        "Current polls"
         "de"        "Aktuelle Umfragen"
         "pl"        "Aktywne ankiety"
+    }
+
+    "Menu - Extend polls"
+    {
+        "en"        "Which poll to extend?"
+        "de"        "Welche Umfrage soll verlängert werden?"
+        "pl"        "Którą ankietę przedłużyć?"
+    }
+
+    "Menu - Close polls"
+    {
+        "en"        "Which poll you want to close?"
+        "de"        "Welche Umfrage möchtest du schließen?"
+        "pl"        "Którą ankietę chcesz zamknąć?"
+    }
+
+    "Menu - Close polls"
+    {
+        "en"        "Which poll you want to close?"
+        "de"        "Welche Umfrage möchtest du schließen?"
     }
 
     "Menu - Voted"
@@ -73,9 +100,9 @@
 
     "Chat - Type title"
     {
-        "en"        "Type your title (at least 2 chars) in chat or abort with '!abort'."
-        "de"        "Gib deinen Titel (mindestens 2 Zeichen) im Chat ein oder breche mit '!abort' ab."
-        "pl"        "Napisz swój tytuł (przynajmniej 2 znaki) na czacie lub przerwij to komendą '!abort'."
+        "en"        "Type your title (at least 4 chars) in chat or abort with '!abort'."
+        "de"        "Gib deinen Titel (mindestens 4 Zeichen) im Chat ein oder breche mit '!abort' ab."
+        "pl"        "Napisz swój tytuł (przynajmniej 4 znaki) na czacie lub przerwij to komendą '!abort'."
     }
 
     "Chat - Type length"
@@ -97,8 +124,15 @@
     "Chat - Type votes"
     {
         "en"        "Type the amount of votes per player (default 1) for one vote in chat or abort with '!abort'. It can't be higher as the amount of options."
-        "de"        "Gib die Anzahl an Abstimmungen pro Spieler (Standard 1) für die Umfrage im Chat an oder breche mit '!abort'. Es kann nicht höher wie die Anzahl der Optionen sein."
+        "de"        "Gib die Anzahl an Abstimmungen pro Spieler (Standard 1) für die Umfrage im Chat an oder breche mit '!abort' ab. Es kann nicht höher wie die Anzahl der Optionen sein."
         "pl"        "Napisz liczbę głosów dla każdego gracza (domyślnie 1) dla jednego głosu na czacie lub przerwij to komendą '!abort'. Nie może być więcej niż liczba opcji."
+    }
+
+    "Chat - Type keywords"
+    {
+        "en"        "Type your keywords (Separate each keyword with {darkblue}\";\" {default}- Type {darkblue}\".\" {default}to display this poll on all servers) in chat or abort with '!abort'."
+        "de"        "Gib deine Schlüsselwörter (Separiere jedes Schlüsselwort mit {darkblue}\";\" {default}- Gib {darkblue}\".\" {default}ein, damit die Umfrage auf allen Servern angezeigt wird) im Chat ein oder brechte mit '!abort' ab."
+        "pl"        "Wpisz słowa kluczowe (Oddziel je znakiem {darkblue}\";\" {default}- Wpisz {darkblue}\".\" {default}, aby wyświetlić tą ankietę na wszystkich serwerach) na czacie lub przerwij to komendą '!abort'."
     }
 
     "Chat - Title"
@@ -137,6 +171,14 @@
         "en"        "Option: {darkred}{1}"
         "de"        "Option: {darkred}{1}"
         "pl"        "Opcje: {darkred}{1}"
+    }
+
+    "Chat - Keyword"
+    {
+        "#format"   "{1:s}"
+        "en"        "Keyword: {darkred}{1}"
+        "de"        "Schlüsselwort: {darkred}{1}"
+        "pl"        "Słowa kluczowe: {darkred}{1}"
     }
 
     "Chat - More Options"
@@ -209,5 +251,66 @@
         "en"        "You need at least 1 vote per vote, otherwise it wouldn't make."
         "de"        "Du brauchst wenigstens 1 Stimme pro Abstimmung, ansonsten macht es kein Sinn."
         "pl"        "Potrzebujesz przynajmniej 1 głosu za głos, w przeciwnym wypadku nie miało by to sensu."
+    }
+
+    "Chat - Keyword - Too short"
+    {
+        "#format"   "{1:s}"
+        "en"        "Keyword {darkblue}\"{1}\" {default}is too short!"
+        "de"        "Schlüsselwort {darkblue}\"{1}\" {default}ist zu kurz!"
+        "pl"        "Słowo kluczowe {darkblue}\"{1}\" {default}jest za krótkie!"
+    }
+
+    "Chat - Keywords - All servers"
+    {
+        "en"        "This poll will be displayed on all servers."
+        "de"        "Diese Umfrage wird auf allen Servern angezeigt."
+        "pl"        "Ta ankieta zostanie wyświetlona na wszystkich serwerach."
+    }
+
+    "Chat - Poll Created"
+    {
+        "#format"   "{1:s}"
+        "en"        "Poll {darkblue}{1:s} {default}was created!"
+        "de"        "Umfrage {darkblue}{1:s} {default}wurde erstellt!"
+        "pl"        "Ankieta {darkblue}{1:s} {default}została utworzona!"
+    }
+
+    "Chat - Running process"
+    {
+        "#format"   "{1:s}"
+        "en"        "Another process is already running. ({1})"
+        "de"        "Es läuft bereits ein anderer Prozess. ({1})"
+        "pl"        "Inny proces jest w trakcie. ({1})"
+    }
+
+    "Chat - Poll extended"
+    {
+        "#format"   "{1:s},{2:d}"
+        "en"        "Poll {darkblue}{1:s} {default}was extended by {darkblue}{2} minutes{default}!"
+        "de"        "Umfrage {darkblue}{1:s} {default}wurde um {darkblue}{2} Minuten verlängert{default}!"
+        "pl"        "Ankieta {darkblue}{1:s} {default}została wydłużona o {darkblue}{2} minut{default}!"
+    }
+
+    "Chat - Title too short"
+    {
+        "en"        "Title is too short. At least 4 chars"
+        "de"        "Title is zu kurz. Mindestens 4 Zeichen"
+        "pl"        "Tytuł jest za krótki. Musi mieć przynajmniej 4 znaki"
+    }
+    
+    "Chat - Poll closed"
+    {
+        "#format"   "{1:s}"
+        "en"        "Poll {darkblue}{1:s} {default}was closed!"
+        "de"        "Umfrage {darkblue}{1:s} {default}wurde geschlossen!"
+        "pl"        "Ankieta {darkblue}{1:s} {default}została zamknięta!"
+    }
+
+    "Chat - Poll closed"
+    {
+        "#format"   "{1:s}"
+        "en"        "Poll {darkblue}{1:s} {default}was closed!"
+        "de"        "Umfrage {darkblue}{1:s} {default}wurde geschlossen!"
     }
 }

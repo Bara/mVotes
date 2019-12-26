@@ -4,34 +4,49 @@ public int Native_CreatePoll(Handle plugin, int numParams)
 
     char sTitle[64];
     GetNativeString(2, sTitle, sizeof(sTitle));
-    
+
     int iLength = GetNativeCell(3);
 
     ArrayList aOptions = view_as<ArrayList>(CloneHandle(GetNativeCell(4)));
 
     int iVotes = GetNativeCell(5);
 
-    return CreatePoll(client, sTitle, iLength, aOptions, iVotes);
+    ArrayList aKeywords = null;
+
+    if (view_as<Handle>(GetNativeCell(6)) != null)
+    {
+        aKeywords = view_as<ArrayList>(CloneHandle(GetNativeCell(6)));
+    }
+
+    return CreatePoll(client, sTitle, iLength, aOptions, iVotes, aKeywords);
+}
+
+public int Native_ExtendPoll(Handle plugin, int numParams)
+{
+    int client = GetNativeCell(1);
+    int pollid = GetNativeCell(2);
+    int length = GetNativeCell(3);
+
+    return ExtendPoll(client, pollid, length);
 }
 
 public int Native_ClosePoll(Handle plugin, int numParams)
 {
-    int poll = GetNativeCell(1);
+    int pollid = GetNativeCell(1);
 
     bool bFound = false;
 
     LoopPollsArray(i)
     {
-        int iPolls[ePolls];
-        g_aPolls.GetArray(i, iPolls[0]);
+        Poll poll;
+        g_aPolls.GetArray(i, poll);
 
-        if (iPolls[pExpire] <= GetTime())
+        if (!IsPollActive(poll.ID))
         {
-            ClosePoll(iPolls[pID]);
             continue;
         }
 
-        if (iPolls[pID] == poll)
+        if (poll.ID == pollid)
         {
             bFound = true;
             break;
@@ -40,6 +55,6 @@ public int Native_ClosePoll(Handle plugin, int numParams)
 
     if (bFound)
     {
-        ClosePoll(poll);
+        ClosePoll(pollid);
     }
 }
