@@ -47,6 +47,7 @@
     {
         "en"        "Set keywords"
         "de"        "Schlüsselwörter festlegen"
+        "pl"        "Ustaw słowa kluczowe"
     }
 
     "Menu - Current polls"
@@ -60,6 +61,14 @@
     {
         "en"        "Which poll to extend?"
         "de"        "Welche Umfrage soll verlängert werden?"
+        "pl"        "Którą ankietę przedłużyć?"
+    }
+
+    "Menu - Close polls"
+    {
+        "en"        "Which poll you want to close?"
+        "de"        "Welche Umfrage möchtest du schließen?"
+        "pl"        "Którą ankietę chcesz zamknąć?"
     }
 
     "Menu - Close polls"
@@ -123,6 +132,7 @@
     {
         "en"        "Type your keywords (Separate each keyword with {darkblue}\";\" {default}- Type {darkblue}\".\" {default}to display this poll on all servers) in chat or abort with '!abort'."
         "de"        "Gib deine Schlüsselwörter (Separiere jedes Schlüsselwort mit {darkblue}\";\" {default}- Gib {darkblue}\".\" {default}ein, damit die Umfrage auf allen Servern angezeigt wird) im Chat ein oder brechte mit '!abort' ab."
+        "pl"        "Wpisz słowa kluczowe (Oddziel je znakiem {darkblue}\";\" {default}- Wpisz {darkblue}\".\" {default}, aby wyświetlić tą ankietę na wszystkich serwerach) na czacie lub przerwij to komendą '!abort'."
     }
 
     "Chat - Title"
@@ -168,6 +178,7 @@
         "#format"   "{1:s}"
         "en"        "Keyword: {darkred}{1}"
         "de"        "Schlüsselwort: {darkred}{1}"
+        "pl"        "Słowa kluczowe: {darkred}{1}"
     }
 
     "Chat - More Options"
@@ -247,12 +258,14 @@
         "#format"   "{1:s}"
         "en"        "Keyword {darkblue}\"{1}\" {default}is too short!"
         "de"        "Schlüsselwort {darkblue}\"{1}\" {default}ist zu kurz!"
+        "pl"        "Słowo kluczowe {darkblue}\"{1}\" {default}jest za krótkie!"
     }
 
     "Chat - Keywords - All servers"
     {
-        "en"        "This poll will displayed on all servers."
+        "en"        "This poll will be displayed on all servers."
         "de"        "Diese Umfrage wird auf allen Servern angezeigt."
+        "pl"        "Ta ankieta zostanie wyświetlona na wszystkich serwerach."
     }
 
     "Chat - Poll Created"
@@ -260,6 +273,7 @@
         "#format"   "{1:s}"
         "en"        "Poll {darkblue}{1:s} {default}was created!"
         "de"        "Umfrage {darkblue}{1:s} {default}wurde erstellt!"
+        "pl"        "Ankieta {darkblue}{1:s} {default}została utworzona!"
     }
 
     "Chat - Running process"
@@ -267,6 +281,7 @@
         "#format"   "{1:s}"
         "en"        "Another process is already running. ({1})"
         "de"        "Es läuft bereits ein anderer Prozess. ({1})"
+        "pl"        "Inny proces jest w trakcie. ({1})"
     }
 
     "Chat - Poll extended"
@@ -274,12 +289,22 @@
         "#format"   "{1:s},{2:d}"
         "en"        "Poll {darkblue}{1:s} {default}was extended by {darkblue}{2} minutes{default}!"
         "de"        "Umfrage {darkblue}{1:s} {default}wurde um {darkblue}{2} Minuten verlängert{default}!"
+        "pl"        "Ankieta {darkblue}{1:s} {default}została wydłużona o {darkblue}{2} minut{default}!"
     }
 
     "Chat - Title too short"
     {
         "en"        "Title is too short. At least 4 chars"
         "de"        "Title is zu kurz. Mindestens 4 Zeichen"
+        "pl"        "Tytuł jest za krótki. Musi mieć przynajmniej 4 znaki"
+    }
+    
+    "Chat - Poll closed"
+    {
+        "#format"   "{1:s}"
+        "en"        "Poll {darkblue}{1:s} {default}was closed!"
+        "de"        "Umfrage {darkblue}{1:s} {default}wurde geschlossen!"
+        "pl"        "Ankieta {darkblue}{1:s} {default}została zamknięta!"
     }
 
     "Chat - Poll closed"
