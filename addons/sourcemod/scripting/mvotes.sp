@@ -38,7 +38,7 @@ public Plugin myinfo =
     name = "mVotes",
     author = "Bara",
     description = "Voting plugin based on mysql",
-    version = "1.0.0-beta",
+    version = "1.0.0",
     url = "github.com/Bara"
 };
 
