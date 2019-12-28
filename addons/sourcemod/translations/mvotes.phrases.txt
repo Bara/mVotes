@@ -5,7 +5,7 @@
         "#format"   "{1:d}"
         "en"        "We've {darkblue}{1} {default}active votes. Type {darkblue}!votes {default}to view all available polls."
         "de"        "Wir haben aktuell {darkblue}{1} {default}aktive Umfrage(n). Gib {darkblue}!votes {default}im Chat ein um alle Umfragen zu sehen."
-        "pl"        "Mamy {darkblue}{1} {default}aktywnych głosów. Napisz {darkblue}!votes {default} aby zobaczyć listę ankiet."
+        "pl"        "Mamy {darkblue}{1} {default}aktywnych ankiet. Napisz {darkblue}!votes {default} aby zobaczyć listę ankiet."
     }
 
     "Menu - Create Vote"
@@ -75,6 +75,7 @@
     {
         "en"        "Which poll you want to close?"
         "de"        "Welche Umfrage möchtest du schließen?"
+        "pl"        "Którą ankietę chcesz zamknąć?"
     }
 
     "Menu - Voted"
@@ -312,5 +313,6 @@
         "#format"   "{1:s}"
         "en"        "Poll {darkblue}{1:s} {default}was closed!"
         "de"        "Umfrage {darkblue}{1:s} {default}wurde geschlossen!"
+        "pl"        "Ankieta {darkblue}{1:s} {default}została zakończona!"
     }
 }
