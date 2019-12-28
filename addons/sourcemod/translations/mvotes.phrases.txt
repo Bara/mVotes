@@ -75,6 +75,7 @@
     {
         "en"        "Which poll you want to close?"
         "de"        "Welche Umfrage möchtest du schließen?"
+        "pl"        "Którą ankietę chcesz zamknąć?"
     }
 
     "Menu - Voted"
@@ -312,5 +313,6 @@
         "#format"   "{1:s}"
         "en"        "Poll {darkblue}{1:s} {default}was closed!"
         "de"        "Umfrage {darkblue}{1:s} {default}wurde geschlossen!"
+        "pl"        "Ankieta {darkblue}{1:s} {default}została zakończona!"
     }
 }
