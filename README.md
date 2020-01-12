@@ -1,4 +1,7 @@
 # mVotes
+
+[![Action Status](https://github.com/Bara/mVotes/workflows/Compile%20with%20SourceMod/badge.svg)](https://github.com/Bara/mVotes/actions)
+
 This plugin is a standalone polls plugin. Admins with the vote flag can create, extend and close polls with a pretty easy to use menu. It's also possible to give multiple votes on one poll. All data and results are saved in a mysql database. Active polls, options and votes are cached as enum struct in a arraylist to increase the performance without many mysql queries.
 
 ## Which features will not added (except anyone do it)
