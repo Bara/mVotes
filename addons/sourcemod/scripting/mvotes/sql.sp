@@ -38,7 +38,12 @@ public void sqlConnect(Database db, const char[] error, any data)
     if (!g_dDatabase.SetCharset(g_sCharset))
     {
         Format(g_sCharset, sizeof(g_sCharset), "utf8");
-        g_dDatabase.SetCharset(g_sCharset);
+        
+        if (g_dDatabase.SetCharset(g_sCharset))
+        {
+            SetFailState("[MVotes.sqlConnect] SetCharset failed!");
+            return;
+        }
     }
 
     CreateTables();
@@ -61,6 +66,7 @@ void CreateTables()
             `ip` varchar(18) NOT NULL, \
             `port` int(6) NOT NULL, \
             `keywords` varchar(128) DEFAULT NULL, \
+            `map` varchar(32), \
             PRIMARY KEY (`id`), \
             UNIQUE KEY (`title`, `created`) \
         ) ENGINE=InnoDB CHARSET=\"%s\"", g_sCharset);
@@ -122,11 +128,30 @@ public void sqlCreateTables(Database db, DBResultSet results, const char[] error
             LogMessage("[MVotes.sqlCreateTables] Table: %d, g_iCreateTables: %d", data, g_iCreateTables);
         }
 
+        if (data == 1)
+        {
+            char sQuery[256];
+            g_dDatabase.Format(sQuery, sizeof(sQuery), "ALTER TABLE `mvotes_polls` ADD COLUMN `map` VARCHAR(32) NULL;");
+            g_dDatabase.Query(sqlAddColumn, sQuery);
+        }
+
         if (g_iCreateTables == 3)
         {
             LoadPolls();
             g_bLoaded = true;
         }
+    }
+}
+
+public void sqlAddColumn(Database db, DBResultSet results, const char[] error, any data)
+{
+    if (db == null || strlen(error) > 0)
+    {
+        if (StrContains(error, "duplicate", false) == -1)
+        {
+            SetFailState("[MVotes.sqlAddColumn] Query failed: %s", error);
+        }
+        return;
     }
 }
 
