@@ -184,6 +184,9 @@ void ListPolls(int client)
 
     Format(sBuffer, sizeof(sBuffer), "%T", "Menu - Voted", client);
 
+    char sMap[32];
+    GetCurrentMap(sMap, sizeof(sMap));
+
     LoopPollsArray(i)
     {
         Poll poll;
@@ -194,22 +197,13 @@ void ListPolls(int client)
             continue;
         }
 
-        /* int iCount = 0;
-        LoopOptionsArray(j)
+        if (strlen(poll.Map) > 2)
         {
-            int iOptions[eOption];
-            g_aOptions.GetArray(j, iOptions[0]);
-
-            if (iPolls[pID] == iOptions[oPoll])
+            if (!StrEqual(poll.Map, sMap, false))
             {
-                iCount++;
+                continue;
             }
         }
-
-        if (iCount < g_cMinOptions.IntValue)
-        {
-            continue;
-        } */
 
         char sPollID[12];
         IntToString(poll.ID, sPollID, sizeof(sPollID));
