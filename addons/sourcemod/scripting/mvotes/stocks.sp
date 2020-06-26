@@ -15,7 +15,7 @@ stock void LoadPolls()
     g_aVotes = new ArrayList(sizeof(Vote));
 
     char sQuery[256];
-    g_dDatabase.Format(sQuery, sizeof(sQuery), "SELECT `id`, `status`, `title`, `created`, `expire`, `votes`, `keywords` FROM `mvotes_polls` WHERE `status` = '1' ORDER BY `id` ASC");
+    g_dDatabase.Format(sQuery, sizeof(sQuery), "SELECT `id`, `status`, `title`, `created`, `expire`, `votes`, `keywords`, `map` FROM `mvotes_polls` WHERE `status` = '1' ORDER BY `id` ASC");
 
     if (g_cDebug.BoolValue)
     {

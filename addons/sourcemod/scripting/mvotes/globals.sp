@@ -28,6 +28,7 @@ enum struct Poll
     int Votes;
     char Title[64];
     char Keywords[128];
+    char Map[32];
 }
 
 ArrayList g_aPolls = null;
