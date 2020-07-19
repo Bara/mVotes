@@ -54,7 +54,7 @@
     {
         "en"        "Map based vote"
         "de"        "Kartenbasierte Umfrage"
-        "pl"        "Ustaw słowa kluczowe"
+        "pl"        "Głosowanie na bazie mapy"
     }
 
     "Menu - Map based Set"
@@ -62,7 +62,7 @@
         "#format"   "{1:s}"
         "en"        "Map based vote (Map: {1})"
         "de"        "Kartenbasierte Umfrage (Karte: {1})"
-        "pl"        "Ustaw słowa kluczowe (Map: {1})"
+        "pl"        "Głosowanie na bazie mapy (Mapa: {1})"
     }
 
     "Menu - Current polls"
@@ -336,11 +336,13 @@
         "#format"   "{1:s}"
         "en"        "Map set to {darkblue}{1}{default}."
         "de"        "Karte auf {darkblue}{1:s} {default}gesetzt."
+        "de"        "Mapa ustawiona na {darkblue}{1:s} {default}."
     }
 
     "Chat - Map Reset"
     {
         "en"        "Map has been {darkblue}cleared{default}."
         "de"        "Karte wurde {darkblue}zurückgesetzt{default}."
+        "de"        "Ustawienie mapy zostało {darkblue}wyczyszczone{default}."
     }
 }
