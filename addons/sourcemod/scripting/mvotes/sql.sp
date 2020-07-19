@@ -354,6 +354,8 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
         int iVotes = dp.ReadCell();
         ArrayList aKeywords = dp.ReadCell();
         int client = dp.ReadCell();
+        char sMap[32];
+        dp.ReadString(sMap, sizeof(sMap));
         delete dp;
 
         int iPoll = results.InsertId;
@@ -374,7 +376,7 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
 
         if (g_cDebug.BoolValue)
         {
-            LogMessage("[MVotes.sqlInsertPoll] PollID: %d Title: %s, Created: %d, Expire: %d, Options: %d, Options.Length: %d, Votes: %d, Keywords: %s", iPoll, sTitle, iCreated, iExpire, aOptions, aOptions.Length, iVotes, sKeywords);
+            LogMessage("[MVotes.sqlInsertPoll] PollID: %d Title: %s, Created: %d, Expire: %d, Options: %d, Options.Length: %d, Votes: %d, Keywords: %s, Map: %s", iPoll, sTitle, iCreated, iExpire, aOptions, aOptions.Length, iVotes, sKeywords, sMap);
         }
 
 
@@ -399,12 +401,13 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
             poll.Votes = iVotes;
             strcopy(poll.Title, sizeof(sTitle), sTitle);
             strcopy(poll.Keywords, sizeof(sKeywords), sKeywords);
+            strcopy(poll.Map, sizeof(sMap), sMap);
 
             g_aPolls.PushArray(poll);
 
             if (g_cDebug.BoolValue)
             {
-                LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s, Votes: %d", poll.ID, poll.Status, poll.Created, poll.Expire, poll.Title, poll.Votes);
+                LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s, Votes: %d, Map: %s", poll.ID, poll.Status, poll.Created, poll.Expire, poll.Title, poll.Votes, poll.Map);
             }
         }
 

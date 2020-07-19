@@ -57,7 +57,7 @@ void ShowCreateMenu(int client)
         LogMessage("[MVotes.ShowCreateMenu] called");
     }
 
-    char sBuffer[32];
+    char sBuffer[64];
 
     Format(sBuffer, sizeof(sBuffer), "%T\n ", "Menu - Create Vote", client);
 
@@ -110,18 +110,18 @@ void ShowCreateMenu(int client)
 
     if (g_aKeywords[client] != null)
     {
-        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Set keywords", client);
+        Format(sBuffer, sizeof(sBuffer), "[X] %T", "Menu - Set keywords", client);
         menu.AddItem("keywords", sBuffer);
     }
     else
     {
-        Format(sBuffer, sizeof(sBuffer), "[ ] %T\n ", "Menu - Set keywords", client);
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T", "Menu - Set keywords", client);
         menu.AddItem("keywords", sBuffer);
     }
 
     if (strlen(g_sMap[client]) > 2)
     {
-        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Map based Set", client);
+        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Map based Set", client, g_sMap[client]);
         menu.AddItem("mapvote", sBuffer);
     }
     else
@@ -208,11 +208,11 @@ public int Menu_CreateMenu(Menu menu, MenuAction action, int client, int param)
 
             if (g_aKeywords[client].Length > 0)
             {
-                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], g_aKeywords[client]);
+                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], g_aKeywords[client], g_sMap[client]);
             }
             else
             {
-                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], null);
+                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], null, g_sMap[client]);
             }
 
             DataPack pack = new DataPack();

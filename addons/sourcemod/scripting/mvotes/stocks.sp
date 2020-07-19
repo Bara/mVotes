@@ -51,7 +51,7 @@ stock bool IsClientValid(int client)
     return false;
 }
 
-stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList options, int votes, ArrayList keywords)
+stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList options, int votes, ArrayList keywords, const char[] map)
 {
     if (g_cDebug.BoolValue)
     {
@@ -142,7 +142,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     }
 
     char sQuery[1024];
-    Format(sQuery, sizeof(sQuery), "INSERT INTO `mvotes_polls` (`status`, `title`, `created`, `expire`, `votes`, `admin`, `ip`, `port`, `keywords`) VALUES ('1', \"%s\", '%d', '%d', '%d', \"%s\", \"%s\", '%d', \"%s\");", title, g_iTime, g_iExpire, votes, sAdmin, sIP, iPort, sKeywords);
+    Format(sQuery, sizeof(sQuery), "INSERT INTO `mvotes_polls` (`status`, `title`, `created`, `expire`, `votes`, `admin`, `ip`, `port`, `keywords`, `map`) VALUES ('1', \"%s\", '%d', '%d', '%d', \"%s\", \"%s\", '%d', \"%s\", \"%s\");", title, g_iTime, g_iExpire, votes, sAdmin, sIP, iPort, sKeywords, map);
 
     if (g_cDebug.BoolValue)
     {
@@ -158,6 +158,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     dp.WriteCell(votes);
     dp.WriteCell(keywords);
     dp.WriteCell(client);
+    dp.WriteString(map);
 
     return -1;
 }
@@ -196,6 +197,8 @@ void ListPolls(int client)
         {
             continue;
         }
+
+        PrintToChat(client, "Map: %s", poll.Map);
 
         if (strlen(poll.Map) > 2)
         {
