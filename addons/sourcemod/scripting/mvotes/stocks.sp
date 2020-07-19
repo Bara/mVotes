@@ -514,12 +514,20 @@ int GetActivePolls()
 {
     int iVotes = 0;
 
+    char sMap[32];
+    GetCurrentMap(sMap, sizeof(sMap));
+
     LoopPollsArray(i)
     {
         Poll poll;
         g_aPolls.GetArray(i, poll);
 
         if (!IsPollActive(poll.ID))
+        {
+            continue;
+        }
+
+        if (!StrEqual(poll.Map, sMap, false))
         {
             continue;
         }
@@ -537,12 +545,20 @@ ArrayList GetActivePollsArray()
 {
     ArrayList aPolls = new ArrayList();
 
+    char sMap[32];
+    GetCurrentMap(sMap, sizeof(sMap));
+
     LoopPollsArray(i)
     {
         Poll poll;
         g_aPolls.GetArray(i, poll);
 
         if (!IsPollActive(poll.ID))
+        {
+            continue;
+        }
+
+        if (!StrEqual(poll.Map, sMap, false))
         {
             continue;
         }
