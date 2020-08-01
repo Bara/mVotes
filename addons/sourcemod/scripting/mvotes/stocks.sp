@@ -685,6 +685,8 @@ bool CompareKeywords(const char[] keywords)
     int iKeysS = ExplodeString(keywords, ";", sKeysS, sizeof(sKeysS), sizeof(sKeysS[]));
     int iKeysC = ExplodeString(sKeywords, ";", sKeysC, sizeof(sKeysC), sizeof(sKeysC[]));
 
+    int iCount = 0;
+
     for (int i = 0; i < iKeysS; i++)
     {
         for (int j = 0; j < iKeysC; j++)
@@ -694,14 +696,17 @@ bool CompareKeywords(const char[] keywords)
                 continue;
             }
             
-            bool bEqual = StrEqual(sKeysS[i], sKeysC[j]);
+            if (StrEqual(sKeysS[i], sKeysC[j], false))
+            {
+                iCount++;
+            }
 
             if (g_cDebug.BoolValue)
             {
-                LogMessage("[MVotes.CompareKeywords] sKeysS: %s, sKeysC: %s, bEqual: %d", sKeysS[i], sKeysC[j], bEqual);
+                LogMessage("[MVotes.CompareKeywords] sKeysS: %s, sKeysC: %s, Count: %d/%d", sKeysS[i], sKeysC[j], iCount, g_cRequiredKeywords.IntValue);
             }
 
-            if (bEqual)
+            if (iCount == g_cRequiredKeywords.IntValue)
             {
                 return true;
             }

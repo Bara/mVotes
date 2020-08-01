@@ -380,7 +380,7 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
         }
 
 
-        bool bAll = StrEqual(sKeywords, ".", false);
+        bool bAll = (strlen(sKeywords) < 2);
         bool bKeywords = CompareKeywords(sKeywords);
 
         if (g_cDebug.BoolValue)
