@@ -18,7 +18,10 @@ public int Native_CreatePoll(Handle plugin, int numParams)
         aKeywords = view_as<ArrayList>(CloneHandle(GetNativeCell(6)));
     }
 
-    return CreatePoll(client, sTitle, iLength, aOptions, iVotes, aKeywords);
+    char sMap[32];
+    GetNativeString(7, sMap, sizeof(sMap));
+
+    return CreatePoll(client, sTitle, iLength, aOptions, iVotes, aKeywords, sMap);
 }
 
 public int Native_ExtendPoll(Handle plugin, int numParams)

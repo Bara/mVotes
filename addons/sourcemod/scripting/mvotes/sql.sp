@@ -38,7 +38,12 @@ public void sqlConnect(Database db, const char[] error, any data)
     if (!g_dDatabase.SetCharset(g_sCharset))
     {
         Format(g_sCharset, sizeof(g_sCharset), "utf8");
-        g_dDatabase.SetCharset(g_sCharset);
+        
+        if (g_dDatabase.SetCharset(g_sCharset))
+        {
+            SetFailState("[MVotes.sqlConnect] SetCharset failed!");
+            return;
+        }
     }
 
     CreateTables();
@@ -61,6 +66,7 @@ void CreateTables()
             `ip` varchar(18) NOT NULL, \
             `port` int(6) NOT NULL, \
             `keywords` varchar(128) DEFAULT NULL, \
+            `map` varchar(32), \
             PRIMARY KEY (`id`), \
             UNIQUE KEY (`title`, `created`) \
         ) ENGINE=InnoDB CHARSET=\"%s\"", g_sCharset);
@@ -122,11 +128,30 @@ public void sqlCreateTables(Database db, DBResultSet results, const char[] error
             LogMessage("[MVotes.sqlCreateTables] Table: %d, g_iCreateTables: %d", data, g_iCreateTables);
         }
 
+        if (data == 1)
+        {
+            char sQuery[256];
+            g_dDatabase.Format(sQuery, sizeof(sQuery), "ALTER TABLE `mvotes_polls` ADD COLUMN `map` VARCHAR(32) NULL;");
+            g_dDatabase.Query(sqlAddColumn, sQuery);
+        }
+
         if (g_iCreateTables == 3)
         {
             LoadPolls();
             g_bLoaded = true;
         }
+    }
+}
+
+public void sqlAddColumn(Database db, DBResultSet results, const char[] error, any data)
+{
+    if (db == null || strlen(error) > 0)
+    {
+        if (StrContains(error, "duplicate", false) == -1)
+        {
+            SetFailState("[MVotes.sqlAddColumn] Query failed: %s", error);
+        }
+        return;
     }
 }
 
@@ -159,9 +184,11 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
                 int iVotes = results.FetchInt(5);
 
                 char sKeywords[128];
-
                 results.FetchString(6, sKeywords, sizeof(sKeywords));
                 bool bAll = StrEqual(sKeywords, ".", false);
+
+                char sMap[32];
+                results.FetchString(7, sMap, sizeof(sMap));
 
                 if (iExpire < GetTime())
                 {
@@ -189,13 +216,14 @@ public void sqlLoadPolls(Database db, DBResultSet results, const char[] error, a
                     poll.Created = iCreated;
                     poll.Expire = iExpire;
                     poll.Votes = iVotes;
-                    Format(poll.Title, sizeof(sTitle), sTitle);
+                    strcopy(poll.Title, sizeof(Poll::Title), sTitle);
+                    strcopy(poll.Map, sizeof(Poll::Map), sMap);
 
                     g_aPolls.PushArray(poll);
 
                     if (g_cDebug.BoolValue)
                     {
-                        LogMessage("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s, iVotes: %d", poll.ID, poll.Status, poll.Created, poll.Expire, poll.Title, poll.Votes);
+                        LogMessage("[MVotes.sqlLoadPolls.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s, iVotes: %d, sMap: %s", poll.ID, poll.Status, poll.Created, poll.Expire, poll.Title, poll.Votes, sMap);
                     }
 
                     char sQuery[256];
@@ -240,7 +268,7 @@ public void sqlLoadOptions(Database db, DBResultSet results, const char[] error,
 
                 option.ID = iOptionID;
                 option.Poll = iPoll;
-                Format(option.Option, sizeof(sOption), sOption);
+                strcopy(option.Option, sizeof(sOption), sOption);
 
                 g_aOptions.PushArray(option);
 
@@ -326,6 +354,8 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
         int iVotes = dp.ReadCell();
         ArrayList aKeywords = dp.ReadCell();
         int client = dp.ReadCell();
+        char sMap[32];
+        dp.ReadString(sMap, sizeof(sMap));
         delete dp;
 
         int iPoll = results.InsertId;
@@ -346,11 +376,11 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
 
         if (g_cDebug.BoolValue)
         {
-            LogMessage("[MVotes.sqlInsertPoll] PollID: %d Title: %s, Created: %d, Expire: %d, Options: %d, Options.Length: %d, Votes: %d, Keywords: %s", iPoll, sTitle, iCreated, iExpire, aOptions, aOptions.Length, iVotes, sKeywords);
+            LogMessage("[MVotes.sqlInsertPoll] PollID: %d Title: %s, Created: %d, Expire: %d, Options: %d, Options.Length: %d, Votes: %d, Keywords: %s, Map: %s", iPoll, sTitle, iCreated, iExpire, aOptions, aOptions.Length, iVotes, sKeywords, sMap);
         }
 
 
-        bool bAll = StrEqual(sKeywords, ".", false);
+        bool bAll = (strlen(sKeywords) < 2);
         bool bKeywords = CompareKeywords(sKeywords);
 
         if (g_cDebug.BoolValue)
@@ -369,14 +399,15 @@ public void sqlInsertPoll(Database db, DBResultSet results, const char[] error, 
             poll.Created = iCreated;
             poll.Expire = iExpire;
             poll.Votes = iVotes;
-            Format(poll.Title, sizeof(sTitle), sTitle);
-            Format(poll.Keywords, sizeof(sKeywords), sKeywords);
+            strcopy(poll.Title, sizeof(sTitle), sTitle);
+            strcopy(poll.Keywords, sizeof(sKeywords), sKeywords);
+            strcopy(poll.Map, sizeof(sMap), sMap);
 
             g_aPolls.PushArray(poll);
 
             if (g_cDebug.BoolValue)
             {
-                LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s, Votes: %d", poll.ID, poll.Status, poll.Created, poll.Expire, poll.Title, poll.Votes);
+                LogMessage("[MVotes.sqlInsertPoll.Cache] iPoll: %d, bStatus: %d, iCreated: %d, iExpire: %d, sTitle: %s, Votes: %d, Map: %s", poll.ID, poll.Status, poll.Created, poll.Expire, poll.Title, poll.Votes, poll.Map);
             }
         }
 
@@ -444,7 +475,7 @@ public void sqlInsertOptions(Database db, DBResultSet results, const char[] erro
 
             option.ID = iOptionID;
             option.Poll = iPoll;
-            Format(option.Option, sizeof(sOption), sOption);
+            strcopy(option.Option, sizeof(sOption), sOption);
 
             g_aOptions.PushArray(option);
 
@@ -564,7 +595,7 @@ public void sqlPlayerVote(Database db, DBResultSet results, const char[] error, 
         vote.Time = time;
         vote.PollID = pollid;
         vote.OptionID = optionid;
-        Format(vote.Community, sizeof(sCommunity), sCommunity);
+        strcopy(vote.Community, sizeof(sCommunity), sCommunity);
 
         g_aVotes.PushArray(vote);
 
@@ -640,7 +671,7 @@ public void sqlLoadClientVotes(Database db, DBResultSet results, const char[] er
                     vote.Time = iTime;
                     vote.PollID = iPoll;
                     vote.OptionID = iOption;
-                    Format(vote.Community, sizeof(sCommunity), sCommunity);
+                    strcopy(vote.Community, sizeof(sCommunity), sCommunity);
 
                     g_aVotes.PushArray(vote);
 
