@@ -8,6 +8,7 @@ static int g_iLength[MAXPLAYERS + 1] = { -1, ...};
 static int g_iVotes[MAXPLAYERS + 1] = { -1, ... };
 
 static char g_sTitle[MAXPLAYERS + 1][64];
+static char g_sMap[MAXPLAYERS + 1][32];
 
 static ArrayList g_aCOptions[MAXPLAYERS + 1] = { null, ...};
 static ArrayList g_aKeywords[MAXPLAYERS + 1] = { null, ...};
@@ -56,7 +57,7 @@ void ShowCreateMenu(int client)
         LogMessage("[MVotes.ShowCreateMenu] called");
     }
 
-    char sBuffer[32];
+    char sBuffer[64];
 
     Format(sBuffer, sizeof(sBuffer), "%T\n ", "Menu - Create Vote", client);
 
@@ -109,13 +110,24 @@ void ShowCreateMenu(int client)
 
     if (g_aKeywords[client] != null)
     {
-        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Set keywords", client);
+        Format(sBuffer, sizeof(sBuffer), "[X] %T", "Menu - Set keywords", client);
         menu.AddItem("keywords", sBuffer);
     }
     else
     {
-        Format(sBuffer, sizeof(sBuffer), "[ ] %T\n ", "Menu - Set keywords", client);
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T", "Menu - Set keywords", client);
         menu.AddItem("keywords", sBuffer);
+    }
+
+    if (strlen(g_sMap[client]) > 2)
+    {
+        Format(sBuffer, sizeof(sBuffer), "[X] %T\n ", "Menu - Map based Set", client, g_sMap[client]);
+        menu.AddItem("mapvote", sBuffer);
+    }
+    else
+    {
+        Format(sBuffer, sizeof(sBuffer), "[ ] %T\n ", "Menu - Map based", client);
+        menu.AddItem("mapvote", sBuffer);
     }
 
     if (strlen(g_sTitle[client]) > 3 && g_iLength[client] >= g_cMinLength.IntValue && g_aCOptions[client].Length >= g_cMinOptions.IntValue && g_iVotes[client] > 0 && g_aKeywords[client] != null)
@@ -175,17 +187,32 @@ public int Menu_CreateMenu(Menu menu, MenuAction action, int client, int param)
             g_bKeywords[client] = true;
             CPrintToChat(client, "%T", "Chat - Type keywords", client);
         }
+        else if (StrEqual(sParam, "mapvote", false))
+        {
+            if (strlen(g_sMap[client]) < 3)
+            {
+                GetCurrentMap(g_sMap[client], sizeof(g_sMap[]));
+                CPrintToChat(client, "%T", "Chat - Map Saved", client, g_sMap[client]);
+            }
+            else
+            {
+                g_sMap[client][0] = '\0';
+                CPrintToChat(client, "%T", "Chat - Map Reset", client);
+            }
+
+            ShowCreateMenu(client);
+        }
         else if (StrEqual(sParam, "create", false))
         {
             int reason = -1;
 
             if (g_aKeywords[client].Length > 0)
             {
-                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], g_aKeywords[client]);
+                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], g_aKeywords[client], g_sMap[client]);
             }
             else
             {
-                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], null);
+                reason = MVotes_CreatePoll(client, g_sTitle[client], g_iLength[client], g_aCOptions[client], g_iVotes[client], null, g_sMap[client]);
             }
 
             DataPack pack = new DataPack();
@@ -477,7 +504,8 @@ void ResetCreateVote(int client, bool message = false)
     g_bVotes[client] = false;
     g_bKeywords[client] = false;
 
-    Format(g_sTitle[client], sizeof(g_sTitle[]), "");
+    g_sTitle[client][0] = '\0';
+    g_sMap[client][0] = '\0';
     
     g_iLength[client] = -1;
     g_iVotes[client] = -1;
