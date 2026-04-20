@@ -15,7 +15,7 @@ stock void LoadPolls()
     g_aVotes = new ArrayList(sizeof(Vote));
 
     char sQuery[256];
-    g_dDatabase.Format(sQuery, sizeof(sQuery), "SELECT `id`, `status`, `title`, `created`, `expire`, `votes`, `keywords` FROM `mvotes_polls` WHERE `status` = '1' ORDER BY `id` ASC");
+    g_dDatabase.Format(sQuery, sizeof(sQuery), "SELECT `id`, `status`, `title`, `created`, `expire`, `votes`, `keywords`, `map` FROM `mvotes_polls` WHERE `status` = '1' ORDER BY `id` ASC");
 
     if (g_cDebug.BoolValue)
     {
@@ -51,7 +51,7 @@ stock bool IsClientValid(int client)
     return false;
 }
 
-stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList options, int votes, ArrayList keywords)
+stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList options, int votes, ArrayList keywords, const char[] map)
 {
     if (g_cDebug.BoolValue)
     {
@@ -142,7 +142,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     }
 
     char sQuery[1024];
-    Format(sQuery, sizeof(sQuery), "INSERT INTO `mvotes_polls` (`status`, `title`, `created`, `expire`, `votes`, `admin`, `ip`, `port`, `keywords`) VALUES ('1', \"%s\", '%d', '%d', '%d', \"%s\", \"%s\", '%d', \"%s\");", title, g_iTime, g_iExpire, votes, sAdmin, sIP, iPort, sKeywords);
+    Format(sQuery, sizeof(sQuery), "INSERT INTO `mvotes_polls` (`status`, `title`, `created`, `expire`, `votes`, `admin`, `ip`, `port`, `keywords`, `map`) VALUES ('1', \"%s\", '%d', '%d', '%d', \"%s\", \"%s\", '%d', \"%s\", \"%s\");", title, g_iTime, g_iExpire, votes, sAdmin, sIP, iPort, sKeywords, map);
 
     if (g_cDebug.BoolValue)
     {
@@ -158,6 +158,7 @@ stock int CreatePoll(int client = -1, const char[] title, int length, ArrayList 
     dp.WriteCell(votes);
     dp.WriteCell(keywords);
     dp.WriteCell(client);
+    dp.WriteString(map);
 
     return -1;
 }
@@ -184,6 +185,9 @@ void ListPolls(int client)
 
     Format(sBuffer, sizeof(sBuffer), "%T", "Menu - Voted", client);
 
+    char sMap[32];
+    GetCurrentMap(sMap, sizeof(sMap));
+
     LoopPollsArray(i)
     {
         Poll poll;
@@ -194,22 +198,15 @@ void ListPolls(int client)
             continue;
         }
 
-        /* int iCount = 0;
-        LoopOptionsArray(j)
-        {
-            int iOptions[eOption];
-            g_aOptions.GetArray(j, iOptions[0]);
+        PrintToChat(client, "Map: %s", poll.Map);
 
-            if (iPolls[pID] == iOptions[oPoll])
+        if (strlen(poll.Map) > 2)
+        {
+            if (!StrEqual(poll.Map, sMap, false))
             {
-                iCount++;
+                continue;
             }
         }
-
-        if (iCount < g_cMinOptions.IntValue)
-        {
-            continue;
-        } */
 
         char sPollID[12];
         IntToString(poll.ID, sPollID, sizeof(sPollID));
@@ -517,12 +514,20 @@ int GetActivePolls()
 {
     int iVotes = 0;
 
+    char sMap[32];
+    GetCurrentMap(sMap, sizeof(sMap));
+
     LoopPollsArray(i)
     {
         Poll poll;
         g_aPolls.GetArray(i, poll);
 
         if (!IsPollActive(poll.ID))
+        {
+            continue;
+        }
+
+        if (!StrEqual(poll.Map, sMap, false))
         {
             continue;
         }
@@ -540,12 +545,20 @@ ArrayList GetActivePollsArray()
 {
     ArrayList aPolls = new ArrayList();
 
+    char sMap[32];
+    GetCurrentMap(sMap, sizeof(sMap));
+
     LoopPollsArray(i)
     {
         Poll poll;
         g_aPolls.GetArray(i, poll);
 
         if (!IsPollActive(poll.ID))
+        {
+            continue;
+        }
+
+        if (!StrEqual(poll.Map, sMap, false))
         {
             continue;
         }
@@ -672,6 +685,8 @@ bool CompareKeywords(const char[] keywords)
     int iKeysS = ExplodeString(keywords, ";", sKeysS, sizeof(sKeysS), sizeof(sKeysS[]));
     int iKeysC = ExplodeString(sKeywords, ";", sKeysC, sizeof(sKeysC), sizeof(sKeysC[]));
 
+    int iCount = 0;
+
     for (int i = 0; i < iKeysS; i++)
     {
         for (int j = 0; j < iKeysC; j++)
@@ -681,14 +696,17 @@ bool CompareKeywords(const char[] keywords)
                 continue;
             }
             
-            bool bEqual = StrEqual(sKeysS[i], sKeysC[j]);
+            if (StrEqual(sKeysS[i], sKeysC[j], false))
+            {
+                iCount++;
+            }
 
             if (g_cDebug.BoolValue)
             {
-                LogMessage("[MVotes.CompareKeywords] sKeysS: %s, sKeysC: %s, bEqual: %d", sKeysS[i], sKeysC[j], bEqual);
+                LogMessage("[MVotes.CompareKeywords] sKeysS: %s, sKeysC: %s, Count: %d/%d", sKeysS[i], sKeysC[j], iCount, g_cRequiredKeywords.IntValue);
             }
 
-            if (bEqual)
+            if (iCount == g_cRequiredKeywords.IntValue)
             {
                 return true;
             }

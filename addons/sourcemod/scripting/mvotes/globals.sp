@@ -14,6 +14,7 @@ ConVar g_cAdminFlag = null;
 ConVar g_cMenuAfterVote = null;
 ConVar g_cDeleteOwnVotes = null;
 ConVar g_cKeywords = null;
+ConVar g_cRequiredKeywords = null;
 
 int g_iCreateTables = -1;
 
@@ -28,6 +29,7 @@ enum struct Poll
     int Votes;
     char Title[64];
     char Keywords[128];
+    char Map[32];
 }
 
 ArrayList g_aPolls = null;

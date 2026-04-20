@@ -66,6 +66,7 @@ public void OnPluginStart()
     g_cMenuAfterVote = AutoExecConfig_CreateConVar("mvotes_menu_after_vote", "1", "Which menu after vote? 0 - Main Menu, 1 - Menu with the current poll", _, true, 0.0, true, 1.0);
     g_cDeleteOwnVotes = AutoExecConfig_CreateConVar("mvotes_delete_own_votes", "0", "Allow deleting own votes from a poll? It just work while the Poll is still active.", _, true, 0.0, true, 1.0);
     g_cKeywords = AutoExecConfig_CreateConVar("mvotes_keywords", "", "Set your server keywords (up to 16 keywords), if you have more servers and want polls for specific servers.\nSeparate each keyword with \";\"\nPolls without an keyword will always displayed");
+    g_cRequiredKeywords = AutoExecConfig_CreateConVar("mvotes_required_keywords", "1", "How many keywords must be equal for showing the poll?\nDefault and Minimum is 1, unless keywords field is empty.", _, true, 1.0);
     AutoExecConfig_ExecuteFile();
     AutoExecConfig_CleanFile();
 
